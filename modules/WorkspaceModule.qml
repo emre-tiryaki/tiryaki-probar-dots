@@ -38,20 +38,6 @@ Row {
                 }
             }
 
-            Text {
-
-                anchors.centerIn: parent
-
-                text: index + 1
-
-                color: WorkspaceService.isActive(index + 1)
-                    ? ThemeColors.background
-                    : ThemeColors.workspaceInactive
-
-                font.pixelSize: 12
-                font.weight: Font.DemiBold
-            }
-
             MouseArea {
 
                 anchors.fill: parent

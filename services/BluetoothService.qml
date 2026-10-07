@@ -71,6 +71,16 @@ Singleton {
         device.pair()
     }
 
+    function forget(device) {
+        if (!device)
+            return
+
+        if (device.connected)
+            device.connected = false
+
+        device.forget()
+    }
+
     function trust(device, trusted) {
         if (!device)
             return

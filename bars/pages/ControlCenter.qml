@@ -7,6 +7,7 @@ Column {
     id: root
 
     property var openWifiPage
+    property var openBluetoothPage
 
     width: parent ? parent.width : 0
 
@@ -69,7 +70,10 @@ Column {
                 ? BluetoothService.connectedCount + " connected"
                 : "Disabled"
 
-            onClicked: BluetoothService.toggle()
+            onClicked: {
+                if (root.openBluetoothPage)
+                    root.openBluetoothPage()
+            }
         }
 
         // Airplane
