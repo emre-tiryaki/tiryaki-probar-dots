@@ -6,6 +6,7 @@ Rectangle {
     id: root
 
     property bool active: false
+    property bool outlined: false
     property alias title: titleText.text
     property alias subtitle: subtitleText.text
     property alias icon: iconText.text
@@ -28,8 +29,8 @@ Rectangle {
                 ? ThemeColors.surfaceHover
                 : ThemeColors.surface
 
-    border.width: active ? 1 : 0
-    border.color: ThemeColors.accent
+    border.width: active || outlined ? 1 : 0
+    border.color: active ? ThemeColors.accent : ThemeColors.border
 
     scale: pressed
         ? 0.97
