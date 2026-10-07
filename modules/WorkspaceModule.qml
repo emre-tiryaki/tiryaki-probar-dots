@@ -4,34 +4,37 @@ import "../common"
 import "../services"
 
 Row {
-
     id: root
 
-    spacing: 6
+    spacing: 8
 
     Repeater {
-
         model: 5
 
         delegate: Rectangle {
-
             required property int index
 
-            width: 28
-            height: 28
+            readonly property bool active: WorkspaceService.isActive(index + 1)
 
-            radius: 14
+            // Aktifse geniş kapsül (22px), inaktifse küçük nokta (8px)
+            width: active ? 22 : 8
+            height: 8
 
-            color: WorkspaceService.isActive(index + 1)
+            radius: 4
+
+            color: active
                 ? ThemeColors.workspaceActive
-                : "transparent"
+                : ThemeColors.workspaceInactive
 
-            border.width: WorkspaceService.isActive(index + 1)
-                ? 0
-                : 1
+            // Aktiflik durumuna göre genişlik değişimi animasyonu
+            Behavior on width {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
 
-            border.color: ThemeColors.workspaceInactive
-
+            // Renk geçiş animasyonu
             Behavior on color {
                 ColorAnimation {
                     duration: 150
@@ -39,9 +42,7 @@ Row {
             }
 
             MouseArea {
-
                 anchors.fill: parent
-
                 cursorShape: Qt.PointingHandCursor
 
                 onClicked: {

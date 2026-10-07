@@ -6,7 +6,7 @@ import "../modules"
 Rectangle {
     id: root
 
-    width: 190
+    width: workspaceMod.width + 28
     height: 35
 
     color: ThemeColors.background
@@ -17,10 +17,12 @@ Rectangle {
     bottomRightRadius: height / 2
 
     WorkspaceModule {
+        id: workspaceMod
+
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            leftMargin: 10
+            leftMargin: 14
         }
     }
 }
