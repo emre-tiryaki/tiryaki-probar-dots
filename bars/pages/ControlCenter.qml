@@ -8,25 +8,14 @@ Column {
 
     property var openWifiPage
     property var openBluetoothPage
+    property var openAudioPage
+    property var openInputPage
 
     width: parent ? parent.width : 0
 
-    spacing: 16
+    spacing: 10
 
-    // Header
-    Text {
-        text: "Control Center"
-
-        color: ThemeColors.text
-
-        font.pixelSize: 16
-        font.weight: Font.DemiBold
-    }
-
-    // Quick controls
     Grid {
-        id: quickGrid
-
         width: parent.width
 
         columns: 2
@@ -34,21 +23,26 @@ Column {
         columnSpacing: 8
         rowSpacing: 8
 
-        // Wi-Fi
         ControlTile {
-            width: (quickGrid.width - 8) / 2
+            width: 180
+            height: 64
 
-            active: NetworkService.connected
-
-            icon: NetworkService.connected
-                ? "󰤨"
-                : "󰤭"
+            icon:
+                NetworkService.connected
+                    ? "󰤨"
+                    : "󰤭"
 
             title: "Wi-Fi"
 
-            subtitle: NetworkService.connected
-                ? NetworkService.currentNetwork
-                : "Disconnected"
+            subtitle:
+                NetworkService.connecting
+                    ? "Connecting..."
+                    : NetworkService.connected
+                        ? NetworkService.currentNetwork
+                        : "Offline"
+
+            active:
+                NetworkService.connected
 
             onClicked: {
                 if (root.openWifiPage)
@@ -56,19 +50,24 @@ Column {
             }
         }
 
-        // Bluetooth
         ControlTile {
-            width: (quickGrid.width - 8) / 2
-
-            active: BluetoothService.enabled
+            width: 180
+            height: 64
 
             icon: "󰂯"
 
             title: "Bluetooth"
 
-            subtitle: BluetoothService.enabled
-                ? BluetoothService.connectedCount + " connected"
-                : "Disabled"
+            subtitle:
+                BluetoothService.connectedCount > 0
+                    ? BluetoothService.connectedCount +
+                      " connected"
+                    : BluetoothService.enabled
+                        ? "Enabled"
+                        : "Disabled"
+
+            active:
+                BluetoothService.enabled
 
             onClicked: {
                 if (root.openBluetoothPage)
@@ -76,384 +75,390 @@ Column {
             }
         }
 
-        // Airplane
         ControlTile {
-            width: (quickGrid.width - 8) / 2
+            width: 180
+            height: 64
 
             icon: "󰀝"
 
             title: "Airplane"
 
-            subtitle: "Wi-Fi + Bluetooth"
+            subtitle: "Flight mode"
+
+            active: false
 
             onClicked: {
-                NetworkService.setEnabled(false)
-                BluetoothService.setEnabled(false)
             }
         }
 
-        // Battery
         ControlTile {
-            width: (quickGrid.width - 8) / 2
+            width: 180
+            height: 64
 
-            active: BatteryService.charging
+            icon: {
+                if (!BatteryService.available)
+                    return "󰂑"
 
-            icon: BatteryService.charging
-                ? "󰂄"
-                : "󰁹"
+                if (BatteryService.charging)
+                    return "󰂄"
+
+                if (BatteryService.percentage >= 80)
+                    return "󰁹"
+
+                if (BatteryService.percentage >= 50)
+                    return "󰂀"
+
+                if (BatteryService.percentage >= 30)
+                    return "󰁾"
+
+                return "󰁺"
+            }
 
             title: "Battery"
 
-            subtitle: BatteryService.available
-                ? BatteryService.percentage + "%"
-                : "Unavailable"
+            subtitle:
+                BatteryService.available
+                    ? BatteryService.percentage + "%"
+                    : "Unavailable"
+
+            active:
+                BatteryService.charging
+
+            onClicked: {
+            }
         }
     }
 
-    // Divider
+    /*
+     * AUDIO
+     */
+
     Rectangle {
+        id: audioCard
+
         width: parent.width
-        height: 1
+        height: 78
 
-        color: ThemeColors.border
-    }
-
-    // Audio
-    Text {
-        text: "Audio"
-
-        color: ThemeColors.text
-
-        font.pixelSize: 13
-        font.weight: Font.DemiBold
-    }
-
-    // Output
-    Rectangle {
-        width: parent.width
-        height: 82
-
-        radius: 16
+        radius: 15
 
         color: ThemeColors.surface
 
-        Row {
+        Column {
             anchors {
                 left: parent.left
-                leftMargin: 12
-                verticalCenter: parent.verticalCenter
+                right: parent.right
+                top: parent.top
+
+                leftMargin: 14
+                rightMargin: 14
+                topMargin: 11
             }
 
-            spacing: 12
+            spacing: 9
 
-            Rectangle {
-                width: 42
-                height: 42
+            Row {
+                width: parent.width
+                height: 22
 
-                radius: 13
-
-                color: ThemeColors.background
+                spacing: 8
 
                 Text {
-                    anchors.centerIn: parent
+                    text:
+                        SoundService.muted
+                            ? "󰖁"
+                            : "󰕾"
 
-                    text: SoundService.muted
-                        ? "󰖁"
-                        : "󰕾"
+                    color:
+                        SoundService.muted
+                            ? ThemeColors.textMuted
+                            : ThemeColors.text
+
+                    font.family:
+                        "Symbols Nerd Font"
+
+                    font.pixelSize: 19
+
+                    anchors.verticalCenter:
+                        parent.verticalCenter
+                }
+
+                Text {
+                    text: "Audio"
 
                     color: ThemeColors.text
 
-                    font.family: "Symbols Nerd Font"
-                    font.pixelSize: 19
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+
+                    anchors.verticalCenter:
+                        parent.verticalCenter
                 }
 
-                TapHandler {
-                    onTapped: SoundService.toggleMute()
+                Item {
+                    width: parent.width - 100
+                    height: 1
                 }
-            }
 
-            Column {
-                width: 280
-
-                spacing: 6
-
-                anchors.verticalCenter: parent.verticalCenter
-
-                Row {
-                    width: parent.width
-
-                    Text {
-                        text: "Output"
-
-                        color: ThemeColors.text
-
-                        font.pixelSize: 11
-                        font.weight: Font.DemiBold
-                    }
-
-                    Item {
-                        width: parent.width - 60
-                        height: 1
-                    }
-
-                    Text {
-                        text: Math.round(
+                Text {
+                    text:
+                        Math.round(
                             SoundService.volume * 100
                         ) + "%"
 
-                        color: ThemeColors.textMuted
+                    color: ThemeColors.textMuted
 
-                        font.pixelSize: 10
-                    }
+                    font.pixelSize: 10
+                    font.weight: Font.DemiBold
+
+                    anchors.verticalCenter:
+                        parent.verticalCenter
                 }
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 5
+
+                radius: height / 2
+
+                color: ThemeColors.border
 
                 Rectangle {
-                    id: outputTrack
-
-                    width: parent.width
-                    height: 6
-
-                    radius: 3
-
-                    color: ThemeColors.background
-
-                    Rectangle {
-                        width: parent.width * SoundService.volume
-                        height: parent.height
-
-                        radius: height / 2
-
-                        color: ThemeColors.accent
-                    }
-
-                    Rectangle {
-                        width: 12
-                        height: 12
-
-                        radius: width / 2
-
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        x: Math.max(
+                    width:
+                        parent.width *
+                        Math.max(
                             0,
                             Math.min(
-                                parent.width - width,
-                                parent.width * SoundService.volume - width / 2
+                                1,
+                                SoundService.volume
                             )
                         )
 
-                        color: ThemeColors.text
+                    height: parent.height
 
-                        MouseArea {
-                            anchors.fill: parent
+                    radius: height / 2
 
-                            onPressed: function(mouse) {
-                                updateVolume(mouse.x)
-                            }
+                    color:
+                        SoundService.muted
+                            ? ThemeColors.textMuted
+                            : ThemeColors.accent
 
-                            onPositionChanged: function(mouse) {
-                                if (pressed)
-                                    updateVolume(mouse.x)
-                            }
-
-                            function updateVolume(mouseX) {
-                                let value =
-                                    (
-                                        outputTrack.width *
-                                        SoundService.volume +
-                                        mouseX -
-                                        width / 2
-                                    ) / outputTrack.width
-
-                                value = Math.max(0, Math.min(1, value))
-
-                                SoundService.setVolume(value)
-                            }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-
-                        z: -1
-
-                        onClicked: function(mouse) {
-                            let value =
-                                mouse.x / outputTrack.width
-
-                            value = Math.max(0, Math.min(1, value))
-
-                            SoundService.setVolume(value)
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 100
                         }
                     }
                 }
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    cursorShape:
+                        Qt.PointingHandCursor
+
+                    onPressed:
+                        function(mouse) {
+                            SoundService.setVolume(
+                                mouse.x / width
+                            )
+                        }
+
+                    onPositionChanged:
+                        function(mouse) {
+                            if (!pressed)
+                                return
+
+                            SoundService.setVolume(
+                                mouse.x / width
+                            )
+                        }
+                }
+            }
+        }
+
+        /*
+         * Only this upper area opens AudioPage.
+         * The slider remains a direct volume control.
+         */
+        MouseArea {
+            anchors {
+                left: parent.left
+                top: parent.top
+                right: parent.right
+            }
+
+            height: 32
+
+            onClicked: {
+                if (root.openAudioPage)
+                    root.openAudioPage()
             }
         }
     }
 
-    // Input
-    Rectangle {
-        width: parent.width
-        height: 82
+    /*
+     * INPUT
+     */
 
-        radius: 16
+    Rectangle {
+        id: inputCard
+
+        width: parent.width
+        height: 78
+
+        radius: 15
 
         color: ThemeColors.surface
 
-        Row {
+        Column {
             anchors {
                 left: parent.left
-                leftMargin: 12
-                verticalCenter: parent.verticalCenter
+                right: parent.right
+                top: parent.top
+
+                leftMargin: 14
+                rightMargin: 14
+                topMargin: 11
             }
 
-            spacing: 12
+            spacing: 9
 
-            Rectangle {
-                width: 42
-                height: 42
+            Row {
+                width: parent.width
+                height: 22
 
-                radius: 13
-
-                color: ThemeColors.background
+                spacing: 8
 
                 Text {
-                    anchors.centerIn: parent
+                    text:
+                        SoundService.microphoneMuted
+                            ? "󰍭"
+                            : "󰍬"
 
-                    text: SoundService.microphoneMuted
-                        ? "󰍭"
-                        : "󰍬"
+                    color:
+                        SoundService.microphoneMuted
+                            ? ThemeColors.textMuted
+                            : ThemeColors.text
+
+                    font.family:
+                        "Symbols Nerd Font"
+
+                    font.pixelSize: 19
+
+                    anchors.verticalCenter:
+                        parent.verticalCenter
+                }
+
+                Text {
+                    text: "Input"
 
                     color: ThemeColors.text
 
-                    font.family: "Symbols Nerd Font"
-                    font.pixelSize: 19
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+
+                    anchors.verticalCenter:
+                        parent.verticalCenter
                 }
 
-                TapHandler {
-                    onTapped: SoundService.toggleMicrophoneMute()
+                Item {
+                    width: parent.width - 100
+                    height: 1
+                }
+
+                Text {
+                    text:
+                        Math.round(
+                            SoundService.microphoneVolume *
+                            100
+                        ) + "%"
+
+                    color: ThemeColors.textMuted
+
+                    font.pixelSize: 10
+                    font.weight: Font.DemiBold
+
+                    anchors.verticalCenter:
+                        parent.verticalCenter
                 }
             }
 
-            Column {
-                width: 280
+            Rectangle {
+                width: parent.width
+                height: 5
 
-                spacing: 6
+                radius: height / 2
 
-                anchors.verticalCenter: parent.verticalCenter
-
-                Row {
-                    width: parent.width
-
-                    Text {
-                        text: "Input"
-
-                        color: ThemeColors.text
-
-                        font.pixelSize: 11
-                        font.weight: Font.DemiBold
-                    }
-
-                    Item {
-                        width: parent.width - 60
-                        height: 1
-                    }
-
-                    Text {
-                        text: Math.round(
-                            SoundService.microphoneVolume * 100
-                        ) + "%"
-
-                        color: ThemeColors.textMuted
-
-                        font.pixelSize: 10
-                    }
-                }
+                color: ThemeColors.border
 
                 Rectangle {
-                    id: inputTrack
-
-                    width: parent.width
-                    height: 6
-
-                    radius: 3
-
-                    color: ThemeColors.background
-
-                    Rectangle {
-                        width: parent.width *
-                               SoundService.microphoneVolume
-
-                        height: parent.height
-
-                        radius: height / 2
-
-                        color: ThemeColors.accent
-                    }
-
-                    Rectangle {
-                        width: 12
-                        height: 12
-
-                        radius: width / 2
-
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        x: Math.max(
+                    width:
+                        parent.width *
+                        Math.max(
                             0,
                             Math.min(
-                                parent.width - width,
-                                parent.width *
-                                SoundService.microphoneVolume -
-                                width / 2
+                                1,
+                                SoundService.microphoneVolume
                             )
                         )
 
-                        color: ThemeColors.text
+                    height: parent.height
 
-                        MouseArea {
-                            anchors.fill: parent
+                    radius: height / 2
 
-                            onPressed: function(mouse) {
-                                updateVolume(mouse.x)
-                            }
+                    color:
+                        SoundService.microphoneMuted
+                            ? ThemeColors.textMuted
+                            : ThemeColors.accent
 
-                            onPositionChanged: function(mouse) {
-                                if (pressed)
-                                    updateVolume(mouse.x)
-                            }
-
-                            function updateVolume(mouseX) {
-                                let value =
-                                    (
-                                        inputTrack.width *
-                                        SoundService.microphoneVolume +
-                                        mouseX -
-                                        width / 2
-                                    ) / inputTrack.width
-
-                                value = Math.max(0, Math.min(1, value))
-
-                                SoundService.setMicrophoneVolume(value)
-                            }
-                        }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-
-                        z: -1
-
-                        onClicked: function(mouse) {
-                            let value =
-                                mouse.x / inputTrack.width
-
-                            value = Math.max(0, Math.min(1, value))
-
-                            SoundService.setMicrophoneVolume(value)
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 100
                         }
                     }
                 }
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    cursorShape:
+                        Qt.PointingHandCursor
+
+                    onPressed:
+                        function(mouse) {
+                            SoundService.setMicrophoneVolume(
+                                mouse.x / width
+                            )
+                        }
+
+                    onPositionChanged:
+                        function(mouse) {
+                            if (!pressed)
+                                return
+
+                            SoundService.setMicrophoneVolume(
+                                mouse.x / width
+                            )
+                        }
+                }
+            }
+        }
+
+        /*
+         * Only the header opens InputPage.
+         */
+        MouseArea {
+            anchors {
+                left: parent.left
+                top: parent.top
+                right: parent.right
+            }
+
+            height: 32
+
+            onClicked: {
+                if (root.openInputPage)
+                    root.openInputPage()
             }
         }
     }

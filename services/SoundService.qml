@@ -1,5 +1,6 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
 
@@ -37,11 +38,6 @@ Singleton {
         sourceReady
             ? source.audio.muted
             : false
-
-    readonly property var audioNodes:
-        Pipewire.nodes.values.filter(node =>
-            node.audio !== null
-        )
 
     readonly property var outputDevices:
         Pipewire.nodes.values.filter(node =>
@@ -88,14 +84,18 @@ Singleton {
     }
 
     function clamp(value) {
-        return Math.max(0, Math.min(1, value))
+        return Math.max(
+            0,
+            Math.min(1, value)
+        )
     }
 
     function setVolume(value) {
         if (!ready)
             return
 
-        sink.audio.volume = clamp(value)
+        sink.audio.volume =
+            clamp(value)
     }
 
     function changeVolume(delta) {
@@ -106,14 +106,16 @@ Singleton {
         if (!ready)
             return
 
-        sink.audio.muted = !sink.audio.muted
+        sink.audio.muted =
+            !sink.audio.muted
     }
 
     function setMicrophoneVolume(value) {
         if (!sourceReady)
             return
 
-        source.audio.volume = clamp(value)
+        source.audio.volume =
+            clamp(value)
     }
 
     function changeMicrophoneVolume(delta) {
@@ -126,34 +128,47 @@ Singleton {
         if (!sourceReady)
             return
 
-        source.audio.muted = !source.audio.muted
+        source.audio.muted =
+            !source.audio.muted
     }
 
     function setNodeVolume(node, value) {
-        if (!node || !node.ready || !node.audio)
+        if (
+            !node ||
+            !node.ready ||
+            !node.audio
+        )
             return
 
-        node.audio.volume = clamp(value)
+        node.audio.volume =
+            clamp(value)
     }
 
     function toggleNodeMute(node) {
-        if (!node || !node.ready || !node.audio)
+        if (
+            !node ||
+            !node.ready ||
+            !node.audio
+        )
             return
 
-        node.audio.muted = !node.audio.muted
+        node.audio.muted =
+            !node.audio.muted
     }
 
     function setDefaultOutput(node) {
         if (!node)
             return
 
-        Pipewire.preferredDefaultAudioSink = node
+        Pipewire.preferredDefaultAudioSink =
+            node
     }
 
     function setDefaultInput(node) {
         if (!node)
             return
 
-        Pipewire.preferredDefaultAudioSource = node
+        Pipewire.preferredDefaultAudioSource =
+            node
     }
 }

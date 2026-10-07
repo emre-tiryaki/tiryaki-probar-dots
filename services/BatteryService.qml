@@ -1,41 +1,112 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Services.UPower
+import Quickshell.Io
 
 Singleton {
+    id: root
 
-    readonly property var battery: UPower.displayDevice
+    readonly property var battery:
+        UPower.displayDevice
 
-    readonly property bool available: {
-        return battery !== null && battery.isPresent
+    readonly property bool available:
+        battery !== null &&
+        battery.isPresent
+
+    readonly property int percentage:
+        available
+            ? Math.round(battery.percentage * 100)
+            : 0
+
+    readonly property var state:
+        available
+            ? battery.state
+            : null
+
+    readonly property bool charging:
+        available &&
+        battery.state === UPowerDeviceState.Charging
+
+    readonly property bool fullyCharged:
+        available &&
+        battery.state === UPowerDeviceState.FullyCharged
+
+    readonly property bool discharging:
+        available &&
+        battery.state === UPowerDeviceState.Discharging
+
+    readonly property string statusText: {
+        if (!available)
+            return "Unavailable"
+
+        if (charging)
+            return "Charging"
+
+        if (fullyCharged)
+            return "Fully charged"
+
+        if (discharging)
+            return "Discharging"
+
+        return "Unknown"
     }
 
-    readonly property int percentage: {
-        if (!available)
-            return 0
+    // ------------------------------------------------------------
+    // Battery health
+    // ------------------------------------------------------------
 
-        return Math.round(battery.percentage * 100)
+    property real energyFull: 0
+    property real energyFullDesign: 0
+
+    readonly property int health:
+        energyFullDesign > 0
+            ? Math.round(
+                (energyFull / energyFullDesign) * 100
+            )
+            : 0
+
+    Process {
+        id: energyFullProcess
+
+        command: [
+            "bash",
+            "-c",
+            "cat /sys/class/power_supply/BAT*/energy_full 2>/dev/null | head -n1"
+        ]
+
+        stdout: StdioCollector {}
+
+        onExited: {
+            var value = parseFloat(stdout.text.trim())
+
+            if (!isNaN(value))
+                root.energyFull = value
+        }
     }
 
-    readonly property var state: {
-        if (!available)
-            return null
+    Process {
+        id: energyFullDesignProcess
 
-        return battery.state
+        command: [
+            "bash",
+            "-c",
+            "cat /sys/class/power_supply/BAT*/energy_full_design 2>/dev/null | head -n1"
+        ]
+
+        stdout: StdioCollector {}
+
+        onExited: {
+            var value = parseFloat(stdout.text.trim())
+
+            if (!isNaN(value))
+                root.energyFullDesign = value
+        }
     }
 
-    readonly property bool charging: {
-        if (!available)
-            return false
-
-        return battery.state === UPowerDeviceState.Charging
-    }
-
-    readonly property bool fullyCharged: {
-        if (!available)
-            return false
-
-        return battery.state === UPowerDeviceState.FullyCharged
+    Component.onCompleted: {
+        energyFullProcess.running = true
+        energyFullDesignProcess.running = true
     }
 }

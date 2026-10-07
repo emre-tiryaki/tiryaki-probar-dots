@@ -3,13 +3,17 @@ import QtQuick
 import "../common"
 import "../state"
 import "../services"
+
 import "./pages"
 
 Item {
     id: root
 
-    property bool expanded: BarState.rightExpanded
+    property bool expanded:
+        BarState.rightExpanded
+
     property bool collapsedHovered: false
+
     property string page: "control"
 
     property real collapsedWidth:
@@ -24,13 +28,15 @@ Item {
             ? contentLoader.item.implicitHeight + 32
             : 35
 
-    width: expanded
-        ? expandedWidth
-        : collapsedWidth
+    width:
+        expanded
+            ? expandedWidth
+            : collapsedWidth
 
-    height: expanded
-        ? expandedHeight
-        : collapsedHeight
+    height:
+        expanded
+            ? expandedHeight
+            : collapsedHeight
 
     Behavior on width {
         NumberAnimation {
@@ -41,7 +47,7 @@ Item {
 
     Behavior on height {
         NumberAnimation {
-            duration: 300
+            duration: 260
             easing.type: Easing.OutCubic
         }
     }
@@ -50,6 +56,7 @@ Item {
         id: closeTimer
 
         interval: 120
+
         repeat: false
 
         onTriggered: {
@@ -74,11 +81,12 @@ Item {
 
         clip: true
 
-        color: root.expanded
-            ? ThemeColors.background
-            : root.collapsedHovered
-                ? ThemeColors.surfaceHover
-                : ThemeColors.background
+        color:
+            root.expanded
+                ? ThemeColors.background
+                : root.collapsedHovered
+                    ? ThemeColors.surfaceHover
+                    : ThemeColors.background
 
         bottomLeftRadius: 18
 
@@ -88,52 +96,59 @@ Item {
             }
         }
 
-        // ========================================================
-        // Collapsed bar
-        // ========================================================
+        /*
+         * COLLAPSED
+         */
 
         Item {
             id: collapsedLayer
 
             anchors.fill: parent
 
-            visible: !root.expanded
+            visible:
+                !root.expanded
 
             Row {
                 id: collapsedContent
 
                 anchors {
-                    verticalCenter: parent.verticalCenter
-                    right: parent.right
+                    verticalCenter:
+                        parent.verticalCenter
+
+                    right:
+                        parent.right
+
                     rightMargin: 10
                 }
 
                 spacing: 10
 
-                // ------------------------------------------------
-                // Wi-Fi
-                // ------------------------------------------------
-
                 Row {
                     spacing: 5
 
                     Text {
-                        text: NetworkService.connecting
-                            ? "󰤨"
-                            : NetworkService.connected
+                        text:
+                            NetworkService.connecting
                                 ? "󰤨"
-                                : "󰤭"
+                                : NetworkService.connected
+                                    ? "󰤨"
+                                    : "󰤭"
 
-                        color: ThemeColors.text
+                        color:
+                            ThemeColors.text
 
-                        font.family: "Symbols Nerd Font"
+                        font.family:
+                            "Symbols Nerd Font"
+
                         font.pixelSize: 16
 
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter:
+                            parent.verticalCenter
 
-                        opacity: NetworkService.connecting
-                            ? 0.45
-                            : 1
+                        opacity:
+                            NetworkService.connecting
+                                ? 0.45
+                                : 1
 
                         Behavior on opacity {
                             NumberAnimation {
@@ -143,18 +158,22 @@ Item {
                     }
 
                     Text {
-                        text: NetworkService.connecting
-                            ? "Connecting..."
-                            : NetworkService.connected
-                                ? NetworkService.currentNetwork
-                                : "Offline"
+                        text:
+                            NetworkService.connecting
+                                ? "Connecting..."
+                                : NetworkService.connected
+                                    ? NetworkService.currentNetwork
+                                    : "Offline"
 
-                        color: ThemeColors.text
+                        color:
+                            ThemeColors.text
 
                         font.pixelSize: 11
-                        font.weight: Font.Medium
+                        font.weight:
+                            Font.Medium
 
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter:
+                            parent.verticalCenter
                     }
                 }
 
@@ -162,42 +181,50 @@ Item {
                     width: 1
                     height: 16
 
-                    color: ThemeColors.border
+                    color:
+                        ThemeColors.border
 
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter:
+                        parent.verticalCenter
                 }
-
-                // ------------------------------------------------
-                // Sound
-                // ------------------------------------------------
 
                 Row {
                     spacing: 5
 
                     Text {
-                        text: SoundService.muted
-                            ? "󰖁"
-                            : "󰕾"
+                        text:
+                            SoundService.muted
+                                ? "󰖁"
+                                : "󰕾"
 
-                        color: ThemeColors.text
+                        color:
+                            ThemeColors.text
 
-                        font.family: "Symbols Nerd Font"
+                        font.family:
+                            "Symbols Nerd Font"
+
                         font.pixelSize: 16
 
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter:
+                            parent.verticalCenter
                     }
 
                     Text {
-                        text: Math.round(
-                            SoundService.volume * 100
-                        ) + "%"
+                        text:
+                            Math.round(
+                                SoundService.volume *
+                                100
+                            ) + "%"
 
-                        color: ThemeColors.text
+                        color:
+                            ThemeColors.text
 
                         font.pixelSize: 11
-                        font.weight: Font.Medium
+                        font.weight:
+                            Font.Medium
 
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter:
+                            parent.verticalCenter
                     }
                 }
 
@@ -205,31 +232,34 @@ Item {
                     width: 1
                     height: 16
 
-                    color: ThemeColors.border
+                    color:
+                        ThemeColors.border
 
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter:
+                        parent.verticalCenter
                 }
-
-                // ------------------------------------------------
-                // Bluetooth
-                // ------------------------------------------------
 
                 Item {
                     width: 22
                     height: 22
 
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenter:
+                        parent.verticalCenter
 
                     Text {
-                        anchors.centerIn: parent
+                        anchors.centerIn:
+                            parent
 
                         text: "󰂯"
 
-                        color: BluetoothService.enabled
-                            ? ThemeColors.text
-                            : ThemeColors.textMuted
+                        color:
+                            BluetoothService.enabled
+                                ? ThemeColors.text
+                                : ThemeColors.textMuted
 
-                        font.family: "Symbols Nerd Font"
+                        font.family:
+                            "Symbols Nerd Font"
+
                         font.pixelSize: 17
                     }
 
@@ -240,93 +270,107 @@ Item {
                         width: 11
                         height: 11
 
-                        radius: width / 2
+                        radius:
+                            width / 2
 
                         anchors {
-                            right: parent.right
-                            bottom: parent.bottom
+                            right:
+                                parent.right
+
+                            bottom:
+                                parent.bottom
                         }
 
-                        color: ThemeColors.accent
+                        color:
+                            ThemeColors.accent
 
                         Text {
-                            anchors.centerIn: parent
+                            anchors.centerIn:
+                                parent
 
-                            text: BluetoothService.connectedCount
+                            text:
+                                BluetoothService.connectedCount
 
-                            color: ThemeColors.background
+                            color:
+                                ThemeColors.background
 
                             font.pixelSize: 7
-                            font.weight: Font.Bold
+                            font.weight:
+                                Font.Bold
                         }
                     }
                 }
-
-                // ------------------------------------------------
-                // Battery
-                // ------------------------------------------------
 
                 Row {
                     spacing: 5
 
                     Text {
-                        text: BatteryService.charging
-                            ? "󰂄"
-                            : "󰁹"
+                        text:
+                            BatteryService.charging
+                                ? "󰂄"
+                                : "󰁹"
 
-                        color: ThemeColors.text
+                        color:
+                            ThemeColors.text
 
-                        font.family: "Symbols Nerd Font"
+                        font.family:
+                            "Symbols Nerd Font"
+
                         font.pixelSize: 16
 
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter:
+                            parent.verticalCenter
                     }
 
                     Text {
-                        text: BatteryService.available
-                            ? BatteryService.percentage + "%"
-                            : "--"
+                        text:
+                            BatteryService.available
+                                ? BatteryService.percentage +
+                                  "%"
+                                : "--"
 
-                        color: ThemeColors.text
+                        color:
+                            ThemeColors.text
 
                         font.pixelSize: 11
-                        font.weight: Font.Medium
+                        font.weight:
+                            Font.Medium
 
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter:
+                            parent.verticalCenter
                     }
                 }
             }
-
-            // ----------------------------------------------------
-            // Collapsed interaction
-            // ----------------------------------------------------
 
             TapHandler {
                 onTapped: {
                     closeTimer.stop()
 
                     root.page = "control"
+
                     BarState.rightExpanded = true
                 }
             }
 
             HoverHandler {
                 onHoveredChanged: {
-                    root.collapsedHovered = hovered
+                    root.collapsedHovered =
+                        hovered
                 }
             }
         }
 
-        // ========================================================
-        // Expanded content
-        // ========================================================
+        /*
+         * EXPANDED
+         */
 
         Item {
             id: expandedLayer
 
             anchors.fill: parent
 
-            visible: root.expanded
+            visible:
+                root.expanded
 
             Loader {
                 id: contentLoader
@@ -348,25 +392,30 @@ Item {
                     if (root.page === "bluetooth")
                         return bluetoothPage
 
+                    if (root.page === "audio")
+                        return audioPage
+
+                    if (root.page === "input")
+                        return inputPage
+
                     return controlPage
                 }
             }
 
             HoverHandler {
                 onHoveredChanged: {
-                    if (hovered) {
+                    if (hovered)
                         closeTimer.stop()
-                    } else {
+                    else
                         closeTimer.restart()
-                    }
                 }
             }
         }
     }
 
-    // ============================================================
-    // Pages
-    // ============================================================
+    /*
+     * CONTROL CENTER
+     */
 
     Component {
         id: controlPage
@@ -379,8 +428,20 @@ Item {
             openBluetoothPage: function() {
                 root.page = "bluetooth"
             }
+
+            openAudioPage: function() {
+                root.page = "audio"
+            }
+
+            openInputPage: function() {
+                root.page = "input"
+            }
         }
     }
+
+    /*
+     * WIFI
+     */
 
     Component {
         id: wifiPage
@@ -392,10 +453,42 @@ Item {
         }
     }
 
+    /*
+     * BLUETOOTH
+     */
+
     Component {
         id: bluetoothPage
 
         BluetoothPage {
+            goBack: function() {
+                root.page = "control"
+            }
+        }
+    }
+
+    /*
+     * AUDIO
+     */
+
+    Component {
+        id: audioPage
+
+        AudioPage {
+            goBack: function() {
+                root.page = "control"
+            }
+        }
+    }
+
+    /*
+     * INPUT
+     */
+
+    Component {
+        id: inputPage
+
+        InputPage {
             goBack: function() {
                 root.page = "control"
             }
