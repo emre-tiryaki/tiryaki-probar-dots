@@ -1,6 +1,7 @@
+import QtQuick
+
 import "../../common"
 import "../../services"
-import QtQuick
 
 Item {
     id: root
@@ -9,319 +10,468 @@ Item {
     signal cpuClicked()
     signal gpuClicked()
 
+    implicitWidth: 540
+    implicitHeight: contentColumn.height + 24
+
     function formatBytes(bytes) {
         if (!bytes || bytes <= 0)
-            return "0 B";
+            return "0 B"
 
-        if (bytes >= 1024 * 1024 * 1024 * 1024)
-            return (bytes / 1024 / 1024 / 1024 / 1024).toFixed(1) + " TB";
+        const units = ["B", "KB", "MB", "GB", "TB"]
 
-        if (bytes >= 1024 * 1024 * 1024)
-            return (bytes / 1024 / 1024 / 1024).toFixed(1) + " GB";
+        let value = bytes
+        let unit = 0
 
-        if (bytes >= 1024 * 1024)
-            return (bytes / 1024 / 1024).toFixed(1) + " MB";
+        while (value >= 1024 && unit < units.length - 1) {
+            value /= 1024
+            unit++
+        }
 
-        if (bytes >= 1024)
-            return (bytes / 1024).toFixed(1) + " KB";
-
-        return bytes + " B";
+        return value.toFixed(
+            unit === 0 ? 0 : 1
+        ) + " " + units[unit]
     }
 
-    implicitWidth: 540
-    implicitHeight: contentColumn.height + 20
+    Rectangle {
+        anchors.fill: parent
+
+        radius: 18
+
+        color: ThemeColors.background
+
+        clip: true
+    }
 
     Column {
         id: contentColumn
 
-        width: parent.width - 36
-        spacing: 12
+        width: parent.width - 32
 
         anchors {
             top: parent.top
             horizontalCenter: parent.horizontalCenter
         }
 
+        y: 12
+
+        spacing: 14
+
         PageHeader {
             width: parent.width
+            height: 48
+
             title: "System Stats"
             subtitle: "Hardware usage and storage"
-            onBackClicked: root.backRequested()
+
+            onBackClicked:
+                root.backRequested()
         }
 
-        Rectangle {
+        // Hardware gauges
+        Item {
             width: parent.width
-            height: 1
-            color: ThemeColors.border
-            opacity: 0.6
-        }
+            height: 190
 
-        Row {
-            width: parent.width
-            spacing: 10
-
-            SystemStatGauge {
-                width: (parent.width - 20) / 3
-                label: "CPU"
-                value: SystemStatsService.cpuUsage
-                temperature: SystemStatsService.cpuTemperature
-                detail: SystemStatsService.cpuModel
-                onClicked: root.cpuClicked()
-            }
-
-            SystemStatGauge {
-                width: (parent.width - 20) / 3
-                label: "RAM"
-                value: SystemStatsService.memoryUsage
-                detail: SystemStatsService.memoryTotal > 0 ? ((SystemStatsService.memoryUsed / 1024 / 1024 / 1024).toFixed(1) + " / " + (SystemStatsService.memoryTotal / 1024 / 1024 / 1024).toFixed(1) + " GB") : "Unavailable"
-                clickable: false
-            }
-
-            SystemStatGauge {
-                width: (parent.width - 20) / 3
-                label: "GPU"
-                value: SystemStatsService.gpuAvailable ? SystemStatsService.gpuUsage : 0
-                temperature: SystemStatsService.gpuAvailable ? SystemStatsService.gpuTemperature : -1
-                detail: SystemStatsService.gpuAvailable ? SystemStatsService.gpuName : "GPU unavailable"
-                clickable: SystemStatsService.gpuAvailable
-                onClicked: root.gpuClicked()
-            }
-
-        }
-
-        Text {
-            text: "Storage"
-            color: ThemeColors.text
-            font.pixelSize: 11
-            font.weight: Font.DemiBold
-        }
-
-        Column {
-            width: parent.width
-            spacing: 7
-
-            Repeater {
-                model: SystemStatsService.disks
-
-                delegate: Rectangle {
-                    width: parent.width
-                    height: 72
-                    radius: 12
-                    color: ThemeColors.surface
-                    border.width: 1
-                    border.color: ThemeColors.border
-
-                    Column {
-                        spacing: 6
-
-                        anchors {
-                            fill: parent
-                            leftMargin: 14
-                            rightMargin: 14
-                            topMargin: 11
-                            bottomMargin: 11
-                        }
-
-                        Row {
-                            width: parent.width
-                            height: 18
-
-                            Text {
-                                width: parent.width - percentage.width
-                                text: modelData.filesystem !== "" ? modelData.filesystem : "Disk"
-                                color: ThemeColors.text
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                id: percentage
-
-                                width: 45
-                                text: Math.round(Math.max(0, Math.min(100, modelData.usage))) + "%"
-                                color: ThemeColors.text
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                                horizontalAlignment: Text.AlignRight
-                            }
-
-                        }
-
-                        Row {
-                            width: parent.width
-                            height: 10
-
-                            Text {
-                                width: parent.width - sizeText.width - 8
-                                text: modelData.mountPoint !== "" ? modelData.mountPoint : "Unknown mount"
-                                color: ThemeColors.textMuted
-                                font.pixelSize: 7
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                id: sizeText
-
-                                width: 120
-                                text: formatBytes(modelData.used) + " / " + formatBytes(modelData.total)
-                                color: ThemeColors.textMuted
-                                font.pixelSize: 7
-                                horizontalAlignment: Text.AlignRight
-                            }
-
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            height: 4
-                            radius: 2
-                            color: ThemeColors.background
-
-                            Rectangle {
-                                width: parent.width * Math.max(0, Math.min(100, modelData.usage)) / 100
-                                height: parent.height
-                                radius: 2
-                                color: modelData.usage >= 90 ? "#f38ba8" : modelData.usage >= 75 ? "#fab387" : ThemeColors.accent
-
-                                Behavior on width {
-                                    NumberAnimation {
-                                        duration: 250
-                                        easing.type: Easing.OutCubic
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
+            Row {
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    verticalCenter: parent.verticalCenter
                 }
 
-            }
+                spacing: 12
 
-        }
+                SystemStatGauge {
+                    width: 150
+                    height: 190
 
-        Text {
-            visible: SystemStatsService.externalDisks.length > 0
-            text: "External Storage"
-            color: ThemeColors.text
-            font.pixelSize: 11
-            font.weight: Font.DemiBold
-            topPadding: 4
-        }
+                    label: "CPU"
 
-        Column {
-            width: parent.width
-            spacing: 7
-            visible: SystemStatsService.externalDisks.length > 0
+                    value:
+                        SystemStatsService.cpuUsage
 
-            Repeater {
-                model: SystemStatsService.externalDisks
+                    temperature:
+                        SystemStatsService.cpuTemperature
 
-                delegate: Rectangle {
-                    width: parent.width
-                    height: 72
-                    radius: 12
-                    color: ThemeColors.surface
-                    border.width: 1
-                    border.color: ThemeColors.border
+                    detail:
+                        SystemStatsService.cpuModel
 
-                    Column {
-                        spacing: 6
-
-                        anchors {
-                            fill: parent
-                            leftMargin: 14
-                            rightMargin: 14
-                            topMargin: 11
-                            bottomMargin: 11
-                        }
-
-                        Row {
-                            width: parent.width
-                            height: 18
-
-                            Text {
-                                width: parent.width - percentage.width
-                                text: modelData.filesystem !== "" ? modelData.filesystem : "External Disk"
-                                color: ThemeColors.text
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                id: percentage
-
-                                width: 45
-                                text: Math.round(Math.max(0, Math.min(100, modelData.usage))) + "%"
-                                color: ThemeColors.text
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                                horizontalAlignment: Text.AlignRight
-                            }
-
-                        }
-
-                        Row {
-                            width: parent.width
-                            height: 10
-
-                            Text {
-                                width: parent.width - sizeText.width - 8
-                                text: modelData.mountPoint !== "" ? modelData.mountPoint : "Unknown mount"
-                                color: ThemeColors.textMuted
-                                font.pixelSize: 7
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                id: sizeText
-
-                                width: 120
-                                text: formatBytes(modelData.used) + " / " + formatBytes(modelData.total)
-                                color: ThemeColors.textMuted
-                                font.pixelSize: 7
-                                horizontalAlignment: Text.AlignRight
-                            }
-
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            height: 4
-                            radius: 2
-                            color: ThemeColors.background
-
-                            Rectangle {
-                                width: parent.width * Math.max(0, Math.min(100, modelData.usage)) / 100
-                                height: parent.height
-                                radius: 2
-                                color: modelData.usage >= 90 ? "#f38ba8" : modelData.usage >= 75 ? "#fab387" : ThemeColors.accent
-
-                                Behavior on width {
-                                    NumberAnimation {
-                                        duration: 250
-                                        easing.type: Easing.OutCubic
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
+                    onClicked:
+                        root.cpuClicked()
                 }
 
-            }
+                SystemStatGauge {
+                    width: 150
+                    height: 190
 
+                    label: "Memory"
+
+                    value:
+                        SystemStatsService.memoryUsage
+
+                    detail:
+                        formatBytes(
+                            SystemStatsService.memoryUsed
+                        )
+                        + " / "
+                        + formatBytes(
+                            SystemStatsService.memoryTotal
+                        )
+
+                    clickable: false
+                }
+
+                SystemStatGauge {
+                    width: 150
+                    height: 190
+
+                    label: "GPU"
+
+                    value:
+                        SystemStatsService.gpuAvailable
+                            ? SystemStatsService.gpuUsage
+                            : 0
+
+                    temperature:
+                        SystemStatsService.gpuAvailable
+                            ? SystemStatsService.gpuTemperature
+                            : -1
+
+                    detail:
+                        SystemStatsService.gpuAvailable
+                            ? SystemStatsService.gpuName
+                            : "Unavailable"
+
+                    clickable:
+                        SystemStatsService.gpuAvailable
+
+                    onClicked:
+                        root.gpuClicked()
+                }
+            }
         }
 
+        // Internal storage
+        Column {
+            width: parent.width
+
+            spacing: 8
+
+            Text {
+                text: "Storage"
+
+                color: ThemeColors.text
+
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
+            }
+
+            Column {
+                width: parent.width
+
+                spacing: 8
+
+                Repeater {
+                    model: SystemStatsService.disks
+
+                    delegate: Rectangle {
+                        width: parent.width
+                        height: 78
+
+                        radius: 13
+
+                        color: ThemeColors.surface
+
+                        border.width: 1
+                        border.color: ThemeColors.border
+
+                        Column {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                leftMargin: 14
+                                rightMargin: 14
+                                topMargin: 11
+                            }
+
+                            spacing: 5
+
+                            Row {
+                                width: parent.width
+                                height: 18
+
+                                Text {
+                                    width:
+                                        parent.width - 60
+
+                                    text:
+                                        modelData.filesystem ||
+                                        "Unknown"
+
+                                    color: ThemeColors.text
+
+                                    font.pixelSize: 10
+                                    font.weight: Font.DemiBold
+
+                                    elide:
+                                        Text.ElideRight
+                                }
+
+                                Text {
+                                    width: 60
+
+                                    text:
+                                        Math.round(
+                                            Number(
+                                                modelData.usage || 0
+                                            )
+                                        ) + "%"
+
+                                    color: ThemeColors.text
+
+                                    font.pixelSize: 10
+                                    font.weight: Font.DemiBold
+
+                                    horizontalAlignment:
+                                        Text.AlignRight
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+
+                                text:
+                                    modelData.mountPoint ||
+                                    "/"
+
+                                color: ThemeColors.textMuted
+
+                                font.pixelSize: 9
+
+                                elide:
+                                    Text.ElideMiddle
+                            }
+
+                            Rectangle {
+                                width: parent.width
+                                height: 5
+
+                                radius: 3
+
+                                color: ThemeColors.background
+
+                                Rectangle {
+                                    width:
+                                        parent.width *
+                                        Math.min(
+                                            100,
+                                            Math.max(
+                                                0,
+                                                Number(
+                                                    modelData.usage || 0
+                                                )
+                                            )
+                                        ) / 100
+
+                                    height: parent.height
+
+                                    radius: 3
+
+                                    color: ThemeColors.accent
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+
+                                text:
+                                    formatBytes(
+                                        Number(
+                                            modelData.used || 0
+                                        )
+                                    )
+                                    + " / "
+                                    + formatBytes(
+                                        Number(
+                                            modelData.total || 0
+                                        )
+                                    )
+
+                                color: ThemeColors.textMuted
+
+                                font.pixelSize: 9
+
+                                elide:
+                                    Text.ElideRight
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // External storage
+        Column {
+            visible:
+                SystemStatsService.externalDisks.length > 0
+
+            width: parent.width
+
+            spacing: 8
+
+            Text {
+                text: "External Storage"
+
+                color: ThemeColors.text
+
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
+            }
+
+            Column {
+                width: parent.width
+
+                spacing: 8
+
+                Repeater {
+                    model:
+                        SystemStatsService.externalDisks
+
+                    delegate: Rectangle {
+                        width: parent.width
+                        height: 78
+
+                        radius: 13
+
+                        color: ThemeColors.surface
+
+                        border.width: 1
+                        border.color: ThemeColors.border
+
+                        Column {
+                            anchors {
+                                left: parent.left
+                                right: parent.right
+                                top: parent.top
+                                leftMargin: 14
+                                rightMargin: 14
+                                topMargin: 11
+                            }
+
+                            spacing: 5
+
+                            Row {
+                                width: parent.width
+                                height: 18
+
+                                Text {
+                                    width:
+                                        parent.width - 60
+
+                                    text:
+                                        modelData.filesystem ||
+                                        "External"
+
+                                    color: ThemeColors.text
+
+                                    font.pixelSize: 10
+                                    font.weight: Font.DemiBold
+
+                                    elide:
+                                        Text.ElideRight
+                                }
+
+                                Text {
+                                    width: 60
+
+                                    text:
+                                        Math.round(
+                                            Number(
+                                                modelData.usage || 0
+                                            )
+                                        ) + "%"
+
+                                    color: ThemeColors.text
+
+                                    font.pixelSize: 10
+                                    font.weight: Font.DemiBold
+
+                                    horizontalAlignment:
+                                        Text.AlignRight
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+
+                                text:
+                                    modelData.mountPoint ||
+                                    "External drive"
+
+                                color: ThemeColors.textMuted
+
+                                font.pixelSize: 9
+
+                                elide:
+                                    Text.ElideMiddle
+                            }
+
+                            Rectangle {
+                                width: parent.width
+                                height: 5
+
+                                radius: 3
+
+                                color: ThemeColors.background
+
+                                Rectangle {
+                                    width:
+                                        parent.width *
+                                        Math.min(
+                                            100,
+                                            Math.max(
+                                                0,
+                                                Number(
+                                                    modelData.usage || 0
+                                                )
+                                            )
+                                        ) / 100
+
+                                    height: parent.height
+
+                                    radius: 3
+
+                                    color: ThemeColors.accent
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+
+                                text:
+                                    formatBytes(
+                                        Number(
+                                            modelData.used || 0
+                                        )
+                                    )
+                                    + " / "
+                                    + formatBytes(
+                                        Number(
+                                            modelData.total || 0
+                                        )
+                                    )
+
+                                color: ThemeColors.textMuted
+
+                                font.pixelSize: 9
+
+                                elide:
+                                    Text.ElideRight
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-
 }

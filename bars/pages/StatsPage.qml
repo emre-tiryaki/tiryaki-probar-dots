@@ -6,6 +6,8 @@ import "../../services"
 Item {
     id: root
 
+    signal backRequested()
+
     property string page: "overview"
 
     implicitWidth:
@@ -52,7 +54,7 @@ Item {
 
         StatsOverview {
             onBackRequested:
-                root.goBack()
+                root.backRequested()
 
             onCpuClicked:
                 root.openCpu()

@@ -5,232 +5,267 @@ import QtQuick
 Item {
     id: root
 
+    property real horizontalPadding: 16
+    property real topPadding: 12
+    property real bottomPadding: 16
+
     signal backRequested()
 
     implicitWidth: 540
-    implicitHeight: contentColumn.height + 20
+    implicitHeight: contentColumn.y + contentColumn.height + root.bottomPadding
+
+    Rectangle {
+        anchors.fill: parent
+        radius: 18
+        color: ThemeColors.background
+        clip: true
+    }
 
     Column {
         id: contentColumn
 
-        width: parent.width - 36
-        height: childrenRect.height
+        width: parent.width - root.horizontalPadding * 2
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: root.topPadding
         spacing: 12
-
-        anchors {
-            top: parent.top
-            horizontalCenter: parent.horizontalCenter
-        }
 
         PageHeader {
             width: parent.width
+            height: 48
             title: "GPU"
-            subtitle: SystemStatsService.gpuAvailable ? SystemStatsService.gpuName : "GPU unavailable"
+            subtitle: SystemStatsService.gpuName
             onBackClicked: root.backRequested()
         }
 
         Rectangle {
             width: parent.width
-            height: 120
-            radius: 14
-            color: ThemeColors.surface
-            border.width: 1
-            border.color: ThemeColors.border
-
-            Row {
-                spacing: 20
-
-                anchors {
-                    fill: parent
-                    leftMargin: 18
-                    rightMargin: 18
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 120
-
-                    Text {
-                        text: SystemStatsService.gpuAvailable ? Math.round(SystemStatsService.gpuUsage) + "%" : "—"
-                        color: ThemeColors.text
-                        font.pixelSize: 30
-                        font.weight: Font.DemiBold
-                    }
-
-                    Text {
-                        text: "GPU Usage"
-                        color: ThemeColors.textMuted
-                        font.pixelSize: 8
-                    }
-
-                }
-
-                Rectangle {
-                    width: 1
-                    height: 64
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: ThemeColors.border
-                }
-
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 5
-
-                    Text {
-                        width: 330
-                        text: SystemStatsService.gpuAvailable ? SystemStatsService.gpuName : "GPU unavailable"
-                        color: ThemeColors.text
-                        font.pixelSize: 10
-                        font.weight: Font.DemiBold
-                        elide: Text.ElideRight
-                    }
-
-                    Text {
-                        text: SystemStatsService.gpuAvailable ? Math.round(SystemStatsService.gpuTemperature) + "°C" : "Temperature unavailable"
-                        color: ThemeColors.textMuted
-                        font.pixelSize: 8
-                    }
-
-                }
-
-            }
-
-        }
-
-        Text {
-            text: "GPU Processes"
-            color: ThemeColors.text
-            font.pixelSize: 11
-            font.weight: Font.DemiBold
-        }
-
-        Column {
-            width: parent.width
-            spacing: 7
-            visible: SystemStatsService.gpuAvailable
-
-            Repeater {
-                model: SystemStatsService.gpuProcesses
-
-                delegate: Rectangle {
-                    width: parent.width
-                    height: 62
-                    radius: 12
-                    color: ThemeColors.surface
-                    border.width: 1
-                    border.color: ThemeColors.border
-
-                    Row {
-                        spacing: 12
-
-                        anchors {
-                            fill: parent
-                            leftMargin: 14
-                            rightMargin: 14
-                        }
-
-                        Text {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: "󰢮"
-                            color: ThemeColors.accent
-                            font.family: "Symbols Nerd Font"
-                            font.pixelSize: 18
-                        }
-
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 130
-                            spacing: 3
-
-                            Text {
-                                width: parent.width
-                                text: modelData.name
-                                color: ThemeColors.text
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                                elide: Text.ElideRight
-                            }
-
-                            Text {
-                                width: parent.width
-                                text: "PID " + modelData.pid
-                                color: ThemeColors.textMuted
-                                font.pixelSize: 7
-                            }
-
-                        }
-
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2
-
-                            Text {
-                                text: Number(modelData.memory).toFixed(0) + " MB"
-                                color: ThemeColors.text
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                            }
-
-                            Text {
-                                text: "VRAM"
-                                color: ThemeColors.textMuted
-                                font.pixelSize: 7
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        Rectangle {
-            visible: SystemStatsService.gpuAvailable && SystemStatsService.gpuProcesses.length === 0
-            width: parent.width
-            height: 62
-            radius: 12
-            color: ThemeColors.surface
-            border.width: 1
-            border.color: ThemeColors.border
-
-            Text {
-                anchors.centerIn: parent
-                text: "No GPU processes"
-                color: ThemeColors.textMuted
-                font.pixelSize: 9
-            }
-
-        }
-
-        Rectangle {
-            visible: !SystemStatsService.gpuAvailable
-            width: parent.width
-            height: 70
-            radius: 12
+            height: 118
+            radius: 16
             color: ThemeColors.surface
             border.width: 1
             border.color: ThemeColors.border
 
             Column {
-                anchors.centerIn: parent
-                spacing: 3
+                anchors.fill: parent
+                spacing: 10
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "GPU unavailable"
-                    color: ThemeColors.text
-                    font.pixelSize: 9
-                    font.weight: Font.DemiBold
+                anchors {
+                    leftMargin: 16
+                    rightMargin: 16
+                    topMargin: 14
+                    bottomMargin: 14
                 }
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "No NVIDIA GPU data is available"
-                    color: ThemeColors.textMuted
-                    font.pixelSize: 7
+                Row {
+                    width: parent.width
+                    height: 58
+
+                    Column {
+                        width: parent.width - 150
+                        spacing: 2
+
+                        Text {
+                            text: "GPU Usage"
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 10
+                            font.weight: Font.Medium
+                        }
+
+                        Text {
+                            text: Math.round(SystemStatsService.gpuUsage) + "%"
+                            color: ThemeColors.text
+                            font.pixelSize: 30
+                            font.weight: Font.DemiBold
+                        }
+
+                    }
+
+                    Column {
+                        width: 150
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 3
+
+                        Text {
+                            width: parent.width
+                            text: "Temperature"
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 9
+                            horizontalAlignment: Text.AlignRight
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: SystemStatsService.gpuTemperature > 0 ? Math.round(SystemStatsService.gpuTemperature) + "°C" : "N/A"
+                            color: ThemeColors.text
+                            font.pixelSize: 17
+                            font.weight: Font.DemiBold
+                            horizontalAlignment: Text.AlignRight
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: SystemStatsService.gpuProcesses.length + " processes"
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 8
+                            horizontalAlignment: Text.AlignRight
+                        }
+
+                    }
+
+                }
+
+                Rectangle {
+                    width: parent.width
+                    height: 5
+                    radius: 3
+                    color: ThemeColors.background
+
+                    Rectangle {
+                        width: parent.width * Math.max(0, Math.min(100, SystemStatsService.gpuUsage)) / 100
+                        height: parent.height
+                        radius: 3
+                        color: ThemeColors.accent
+
+                        Behavior on width {
+                            NumberAnimation {
+                                duration: 250
+                                easing.type: Easing.OutCubic
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        Column {
+            width: parent.width
+            spacing: 7
+
+            Text {
+                text: "GPU Processes"
+                color: ThemeColors.text
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 220
+                radius: 14
+                color: ThemeColors.surface
+                border.width: 1
+                border.color: ThemeColors.border
+                clip: true
+
+                Column {
+                    anchors.fill: parent
+                    spacing: 0
+
+                    anchors {
+                        leftMargin: 14
+                        rightMargin: 14
+                        topMargin: 9
+                        bottomMargin: 9
+                    }
+
+                    Row {
+                        width: parent.width
+                        height: 26
+
+                        Text {
+                            width: 60
+                            text: "PID"
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 9
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            width: parent.width - 60 - 85
+                            text: "Process"
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 9
+                            font.weight: Font.DemiBold
+                        }
+
+                        Text {
+                            width: 85
+                            text: "VRAM"
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 9
+                            font.weight: Font.DemiBold
+                            horizontalAlignment: Text.AlignRight
+                        }
+
+                    }
+
+                    Flickable {
+                        id: processFlickable
+
+                        width: parent.width
+                        height: parent.height - 26
+                        clip: true
+                        contentWidth: width
+                        contentHeight: processColumn.height
+                        boundsBehavior: Flickable.StopAtBounds
+                        interactive: contentHeight > height
+
+                        Column {
+                            id: processColumn
+
+                            width: processFlickable.width
+                            spacing: 0
+
+                            Repeater {
+                                model: SystemStatsService.gpuProcesses
+
+                                delegate: Row {
+                                    required property var modelData
+
+                                    width: parent.width
+                                    height: 32
+
+                                    Text {
+                                        width: 60
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: String(modelData.pid || "-")
+                                        color: ThemeColors.textMuted
+                                        font.pixelSize: 10
+                                    }
+
+                                    Text {
+                                        width: parent.width - 60 - 85
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.process_name || modelData.command || "Unknown"
+                                        color: ThemeColors.text
+                                        font.pixelSize: 10
+                                        font.weight: Font.DemiBold
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        width: 85
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: modelData.used_memory !== undefined ? modelData.used_memory + " MiB" : "-"
+                                        color: ThemeColors.accent
+                                        font.pixelSize: 10
+                                        font.weight: Font.DemiBold
+                                        horizontalAlignment: Text.AlignRight
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
                 }
 
             }

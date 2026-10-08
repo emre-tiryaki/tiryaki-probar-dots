@@ -169,12 +169,16 @@ Item {
     Component {
         id: powerPage
 
-        PowerPage {}
+        PowerPage {
+            onBackRequested: root.page = "home"
+        }
     }
 
     Component {
         id: statsPage
 
-        StatsPage {}
+        StatsPage {
+            onBackRequested: root.page = "home"
+        }
     }
 }
