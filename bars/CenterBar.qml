@@ -73,6 +73,8 @@ Item {
                     return statsPage;
                 case "power-mode":
                     return powerModePage;
+                case "clock":
+                    return clockPage;
                 default:
                     return homePage;
                 }
@@ -136,6 +138,15 @@ Item {
         id: powerModePage
 
         PowerModePage {
+            onBackRequested: root.page = "home"
+        }
+
+    }
+
+    Component {
+        id: clockPage
+
+        ClockPage {
             onBackRequested: root.page = "home"
         }
 
