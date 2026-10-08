@@ -4,3 +4,4 @@ singleton BluetoothService 1.0 BluetoothService.qml
 singleton SoundService 1.0 SoundService.qml
 singleton BatteryService 1.0 BatteryService.qml
 singleton PowerService 1.0 PowerService.qml
+singleton SystemStatsService 1.0 SystemStatsService.qml

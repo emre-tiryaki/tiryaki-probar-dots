@@ -6,13 +6,15 @@ import "../../services"
 Item {
     id: root
 
-    implicitWidth: 500
-    implicitHeight: 210
+    signal backRequested()
 
     property string pendingAction: ""
 
+    implicitWidth: 540
+    implicitHeight: contentColumn.height + 20
+
     Timer {
-        id: confirmTimer
+        id: confirmationTimer
 
         interval: 3000
         repeat: false
@@ -24,136 +26,193 @@ Item {
 
     function requestAction(action) {
         if (root.pendingAction === action) {
-            executeAction(action)
+            confirmationTimer.stop()
+            root.pendingAction = ""
+
+            switch (action) {
+            case "shutdown":
+                PowerService.shutdown()
+                break
+
+            case "reboot":
+                PowerService.reboot()
+                break
+
+            case "logout":
+                PowerService.logout()
+                break
+            }
+
             return
         }
 
         root.pendingAction = action
-        confirmTimer.restart()
+        confirmationTimer.restart()
     }
 
-    function executeAction(action) {
-        confirmTimer.stop()
-        root.pendingAction = ""
-
-        switch (action) {
-
-        case "shutdown":
-            PowerService.shutdown()
-            break
-
-        case "reboot":
-            PowerService.reboot()
-            break
-
-        case "lock":
-            PowerService.lock()
-            break
-
-        case "logout":
-            PowerService.logout()
-            break
-        }
+    function lock() {
+        PowerService.lock()
     }
 
     Column {
-        anchors.centerIn: parent
+        id: contentColumn
 
-        spacing: 18
+        width: parent.width - 36
 
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
+        anchors {
+            top: parent.top
+            horizontalCenter: parent.horizontalCenter
+        }
 
-            text: "Power"
+        spacing: 14
 
-            color: ThemeColors.text
+        PageHeader {
+            width: parent.width
 
-            font.pixelSize: 20
-            font.weight: Font.DemiBold
+            title: "Power"
+            subtitle: "Manage your session and system power"
+
+            onBackClicked:
+                root.backRequested()
+        }
+
+        Rectangle {
+            width: parent.width
+            height: 1
+
+            color: ThemeColors.border
+            opacity: 0.6
         }
 
         Row {
-            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
 
             spacing: 10
 
             PowerButton {
-                action: "shutdown"
-                icon: "󰐥"
-                label: "Shutdown"
-                confirmLabel: "Confirm"
+                width: (parent.width - 30) / 4
 
-                confirmable: true
-
-                onTriggered: root.requestAction(action)
-            }
-
-            PowerButton {
-                action: "reboot"
-                icon: "󰜉"
-                label: "Reboot"
-                confirmLabel: "Confirm"
-
-                confirmable: true
-
-                onTriggered: root.requestAction(action)
-            }
-
-            PowerButton {
-                action: "lock"
+                title: "Lock"
+                description: "Lock session"
                 icon: "󰌾"
-                label: "Lock"
 
-                confirmable: false
+                accent: ThemeColors.accent
 
-                onTriggered: root.executeAction(action)
+                onClicked:
+                    root.lock()
             }
 
             PowerButton {
-                action: "logout"
-                icon: "󰍃"
-                label: "Logout"
-                confirmLabel: "Confirm"
+                width: (parent.width - 30) / 4
 
-                confirmable: true
+                title:
+                    root.pendingAction === "shutdown"
+                        ? "Confirm"
+                        : "Shutdown"
 
-                onTriggered: root.requestAction(action)
+                description:
+                    root.pendingAction === "shutdown"
+                        ? "Click again"
+                        : "Power off"
+
+                icon:
+                    root.pendingAction === "shutdown"
+                        ? "󰄬"
+                        : "󰐥"
+
+                destructive:
+                    root.pendingAction === "shutdown"
+
+                onClicked:
+                    root.requestAction("shutdown")
+            }
+
+            PowerButton {
+                width: (parent.width - 30) / 4
+
+                title:
+                    root.pendingAction === "reboot"
+                        ? "Confirm"
+                        : "Reboot"
+
+                description:
+                    root.pendingAction === "reboot"
+                        ? "Click again"
+                        : "Restart system"
+
+                icon:
+                    root.pendingAction === "reboot"
+                        ? "󰄬"
+                        : "󰑐"
+
+                destructive:
+                    root.pendingAction === "reboot"
+
+                onClicked:
+                    root.requestAction("reboot")
+            }
+
+            PowerButton {
+                width: (parent.width - 30) / 4
+
+                title:
+                    root.pendingAction === "logout"
+                        ? "Confirm"
+                        : "Logout"
+
+                description:
+                    root.pendingAction === "logout"
+                        ? "Click again"
+                        : "End session"
+
+                icon:
+                    root.pendingAction === "logout"
+                        ? "󰄬"
+                        : "󰍃"
+
+                destructive:
+                    root.pendingAction === "logout"
+
+                onClicked:
+                    root.requestAction("logout")
             }
         }
     }
 
     component PowerButton: Rectangle {
+        id: button
 
-        property string action
+        property string title
+        property string description
         property string icon
-        property string label
-        property string confirmLabel: ""
-        property bool confirmable: true
 
-        signal triggered()
+        property color accent: ThemeColors.accent
+        property bool destructive: false
 
-        width: 112
-        height: 82
+        signal clicked()
+
+        height: 96
 
         radius: 16
 
-        color: {
-            if (root.pendingAction === action)
-                return "#c94f5b"
-
-            return hoverHandler.hovered
+        color:
+            buttonHover.hovered
                 ? ThemeColors.surfaceHover
                 : ThemeColors.surface
-        }
 
         border.width: 1
 
-        border.color: {
-            if (root.pendingAction === action)
-                return "#e06c75"
+        border.color:
+            button.destructive
+                ? "#f38ba8"
+                : buttonHover.hovered
+                    ? button.accent
+                    : ThemeColors.border
 
-            return ThemeColors.border
-        }
+        scale:
+            buttonHover.hovered
+                ? 1.025
+                : 1.0
 
         Behavior on color {
             ColorAnimation {
@@ -167,48 +226,65 @@ Item {
             }
         }
 
+        Behavior on scale {
+            NumberAnimation {
+                duration: 120
+                easing.type: Easing.OutCubic
+            }
+        }
+
         Column {
             anchors.centerIn: parent
 
-            spacing: 6
+            spacing: 5
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                text:
-                    root.pendingAction === action
-                        ? "󰀦"
-                        : icon
+                text: button.icon
 
-                color: "#ffffff"
+                color:
+                    button.destructive
+                        ? "#f38ba8"
+                        : buttonHover.hovered
+                            ? button.accent
+                            : ThemeColors.text
 
                 font.family: "Symbols Nerd Font"
-                font.pixelSize: 25
+                font.pixelSize: 24
             }
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                text:
-                    root.pendingAction === action
-                        ? confirmLabel
-                        : label
+                text: button.title
 
-                color: "#ffffff"
+                color: ThemeColors.text
 
                 font.pixelSize: 10
                 font.weight: Font.DemiBold
             }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                text: button.description
+
+                color: ThemeColors.textMuted
+
+                font.pixelSize: 7
+            }
         }
 
         HoverHandler {
-            id: hoverHandler
+            id: buttonHover
 
             cursorShape: Qt.PointingHandCursor
         }
 
         TapHandler {
-            onTapped: triggered()
+            onTapped:
+                button.clicked()
         }
     }
 }

@@ -1,3 +1,5 @@
 singleton ThemeColors 1.0 ThemeColors.qml
 ControlTile 1.0 ControlTile.qml
 CenterModuleCard 1.0 CenterModuleCard.qml
+SystemStatGauge 1.0 SystemStatGauge.qml
+PageHeader 1.0 PageHeader.qml

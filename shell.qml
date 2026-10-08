@@ -27,11 +27,7 @@ ShellRoot {
                     right: true
                 }
 
-                /*
-                 * The surface is large enough for the expanded
-                 * RightBar, but only the actual bars receive input.
-                 */
-                implicitHeight: 520
+                implicitHeight: 700
 
                 exclusiveZone: 40
 
@@ -41,12 +37,6 @@ ShellRoot {
 
                 WlrLayershell.namespace: "probar"
 
-                /*
-                 * Only these items are clickable.
-                 *
-                 * Everything else in the 520px surface is
-                 * click-through and goes to the application below.
-                 */
                 mask: Region {
 
                     Region {
