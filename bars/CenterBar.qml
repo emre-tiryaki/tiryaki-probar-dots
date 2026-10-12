@@ -76,6 +76,8 @@ Item {
                     return clockPage;
                 case "calendar":
                     return calendarPage;
+                case "clipboard":
+                    return clipboardPage;
                 default:
                     return homePage;
                 }
@@ -157,6 +159,15 @@ Item {
         id: calendarPage
 
         CalendarPage {
+            onBackRequested: root.page = "home"
+        }
+
+    }
+
+    Component {
+        id: clipboardPage
+
+        ClipboardPage {
             onBackRequested: root.page = "home"
         }
 
