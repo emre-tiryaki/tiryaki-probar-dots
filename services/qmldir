@@ -8,3 +8,4 @@ singleton SystemStatsService 1.0 SystemStatsService.qml
 singleton PowerModeService 1.0 PowerModeService.qml
 singleton MonitorService 1.0 MonitorService.qml
 singleton ClockService 1.0 ClockService.qml
+singleton NotificationService 1.0 NotificationService.qml

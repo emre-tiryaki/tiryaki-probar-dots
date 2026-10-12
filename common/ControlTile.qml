@@ -1,120 +1,74 @@
 import QtQuick
 
-import "."
-
 Rectangle {
-    id: root
+    id: tile
 
+    property string icon
+    property string title
+    property string subtitle
     property bool active: false
-    property bool outlined: false
-    property alias title: titleText.text
-    property alias subtitle: subtitleText.text
-    property alias icon: iconText.text
 
     signal clicked()
 
-    property bool hovered: false
-    property bool pressed: false
+    radius: 14
+    color: active ? Qt.alpha(ThemeColors.accent, 0.14) : area.containsMouse ? ThemeColors.surfaceHover : ThemeColors.surface
+    border.width: 1
+    border.color: active ? ThemeColors.accent : area.containsMouse ? ThemeColors.textMuted : ThemeColors.border
+    scale: area.pressed ? 0.97 : 1
 
-    width: 180
-    height: 64
-
-    radius: 16
-
-    color: pressed
-        ? ThemeColors.surfaceHover
-        : hovered
-            ? ThemeColors.surfaceHover
-            : active
-                ? ThemeColors.surfaceHover
-                : ThemeColors.surface
-
-    border.width: active || outlined ? 1 : 0
-    border.color: active ? ThemeColors.accent : ThemeColors.border
-
-    scale: pressed
-        ? 0.97
-        : hovered
-            ? 1.01
-            : 1.0
-
-    Behavior on color {
-        ColorAnimation {
-            duration: 100
-        }
-    }
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: 100
-            easing.type: Easing.OutCubic
-        }
-    }
-
-    HoverHandler {
-        cursorShape: Qt.PointingHandCursor
-
-        onHoveredChanged: {
-            root.hovered = hovered
-        }
-    }
-
-    TapHandler {
-        onPressedChanged: {
-            root.pressed = pressed
-        }
-
-        onTapped: {
-            root.clicked()
-        }
-    }
+    Behavior on color { ColorAnimation { duration: 120 } }
+    Behavior on border.color { ColorAnimation { duration: 120 } }
+    Behavior on scale { NumberAnimation { duration: 80 } }
 
     Row {
-        anchors {
-            left: parent.left
-            leftMargin: 14
-            verticalCenter: parent.verticalCenter
-        }
-
         spacing: 10
 
+        anchors {
+            left: parent.left
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+            leftMargin: 14
+            rightMargin: 12
+        }
+
         Text {
-            id: iconText
-
-            color: root.active
-                ? ThemeColors.text
-                : ThemeColors.textMuted
-
+            text: tile.icon
+            color: tile.active ? ThemeColors.accent : ThemeColors.text
             font.family: "Symbols Nerd Font"
             font.pixelSize: 22
-
             anchors.verticalCenter: parent.verticalCenter
         }
 
         Column {
+            width: parent.width - 32
             spacing: 2
-
             anchors.verticalCenter: parent.verticalCenter
 
             Text {
-                id: titleText
-
+                width: parent.width
+                text: tile.title
                 color: ThemeColors.text
-
-                font.pixelSize: 12
+                font.pixelSize: 11
                 font.weight: Font.DemiBold
+                elide: Text.ElideRight
             }
 
             Text {
-                id: subtitleText
-
+                width: parent.width
+                text: tile.subtitle
                 color: ThemeColors.textMuted
-
-                font.pixelSize: 10
-
+                font.pixelSize: 9
                 elide: Text.ElideRight
-                width: 125
             }
         }
+    }
+
+    MouseArea {
+        id: area
+
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: tile.clicked()
     }
 }

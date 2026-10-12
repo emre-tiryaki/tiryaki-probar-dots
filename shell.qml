@@ -78,6 +78,8 @@ ShellRoot {
                         right: parent.right
                     }
                 }
+
+                NotificationToast {}
             }
         }
     }
