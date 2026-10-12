@@ -74,15 +74,6 @@ Item {
                 onClicked:
                     root.openPage("calendar")
             }
-
-            CenterModuleCard {
-                title: "Monitors"
-                description: "Displays & refresh rate"
-                icon: "󰍹"
-
-                onClicked:
-                    root.openPage("monitors")
-            }
         }
     }
 }

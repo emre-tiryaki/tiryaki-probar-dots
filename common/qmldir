@@ -3,3 +3,4 @@ ControlTile 1.0 ControlTile.qml
 CenterModuleCard 1.0 CenterModuleCard.qml
 SystemStatGauge 1.0 SystemStatGauge.qml
 PageHeader 1.0 PageHeader.qml
+MonitorPreview 1.0 MonitorPreview.qml
