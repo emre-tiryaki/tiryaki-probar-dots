@@ -40,6 +40,13 @@ Item {
                 onClicked: root.openPage("power-mode")
             }
 
+            CenterModuleCard {
+                title: "Weather"
+                description: "Weather forecast"
+                icon: "󰖙"
+                onClicked: root.openPage("weather")
+            }
+
         }
 
         Row {

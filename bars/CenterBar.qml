@@ -12,6 +12,7 @@ Item {
     property string page: "home"
     property real collapsedWidth: 140
     property real collapsedHeight: 30
+    readonly property bool launcherActive: LauncherService.active
 
     function open() {
         closeTimer.stop();
@@ -20,11 +21,21 @@ Item {
     }
 
     function close() {
+        LauncherService.active = false;
         closeTimer.stop();
         BarState.centerExpanded = false;
         root.page = "home";
     }
 
+    onLauncherActiveChanged: {
+        if (launcherActive) {
+            closeTimer.stop();
+            root.page = "launcher";
+            BarState.centerExpanded = true;
+        } else if (root.page === "launcher") {
+            root.close();
+        }
+    }
     width: expanded ? pageLoader.item ? Math.max(collapsedWidth, pageLoader.item.implicitWidth) : collapsedWidth : collapsedWidth
     height: expanded ? pageLoader.item ? Math.max(collapsedHeight, pageLoader.item.implicitHeight) : collapsedHeight : collapsedHeight
 
@@ -34,7 +45,7 @@ Item {
         interval: 120
         repeat: false
         onTriggered: {
-            if (!root.hovered)
+            if (!root.hovered && root.page !== "launcher")
                 root.close();
 
         }
@@ -78,6 +89,10 @@ Item {
                     return calendarPage;
                 case "clipboard":
                     return clipboardPage;
+                case "launcher":
+                    return launcherPage;
+                case "weather":
+                    return weatherPage;
                 default:
                     return homePage;
                 }
@@ -168,6 +183,23 @@ Item {
         id: clipboardPage
 
         ClipboardPage {
+            onBackRequested: root.page = "home"
+        }
+
+    }
+
+    Component {
+        id: launcherPage
+
+        LauncherPage {
+        }
+
+    }
+
+    Component {
+        id: weatherPage
+
+        WeatherPage {
             onBackRequested: root.page = "home"
         }
 
