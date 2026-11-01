@@ -37,6 +37,10 @@ Singleton {
     readonly property var allowedSources: ["spotify", "helium", "chrom", "firefox", "librewolf", "brave", "zen"]
 
     function isAllowed(p) {
+        const hasMedia = p.isPlaying || (p.playbackState !== MprisPlaybackState.Stopped && (p.trackTitle || "") !== "");
+        if (!hasMedia)
+            return false;
+
         const key = ((p.desktopEntry || "") + " " + (p.identity || "")).toLowerCase();
         return allowedSources.some(s => key.includes(s));
     }

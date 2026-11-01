@@ -2,6 +2,7 @@ import "../../common"
 import "../../services"
 import QtQuick
 import QtQuick.Effects
+import QtQuick.Layouts
 
 Item {
     id: root
@@ -18,7 +19,7 @@ Item {
     }
 
     visible: MediaService.hasPlayer
-    implicitHeight: visible ? 176 : 0
+    implicitHeight: visible ? 144 : 0
     height: implicitHeight
 
     ArtPalette {
@@ -77,312 +78,325 @@ Item {
             }
         }
 
-        Row {
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 16
+        Item {
+            id: art
+
+            width: 116
+            height: 116
+
+            anchors {
+                left: parent.left
+                leftMargin: 14
+                verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                id: artMask
+
+                anchors.fill: parent
+                radius: 14
+                visible: false
+                layer.enabled: true
+            }
+
+            Image {
+                id: artImage
+
+                anchors.fill: parent
+                source: MediaService.artUrl
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                sourceSize.width: 232
+                sourceSize.height: 232
+                visible: status === Image.Ready
+                layer.enabled: true
+
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: artMask
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 14
+                color: colors.surface
+                visible: artImage.status !== Image.Ready
+
+                SourceIcon {
+                    anchors.centerIn: parent
+                    size: 52
+                    glyphColor: colors.accent
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 14
+                color: "transparent"
+                border.width: 1
+                border.color: Qt.alpha(colors.accent, 0.25)
+            }
+        }
+
+        Column {
+            id: info
+
+            spacing: 4
+
+            anchors {
+                left: art.right
+                leftMargin: 16
+                right: parent.right
+                rightMargin: 14
+                verticalCenter: parent.verticalCenter
+            }
 
             Item {
-                id: art
-
-                width: 148
-                height: 148
+                width: parent.width
+                height: 22
 
                 Rectangle {
-                    id: artMask
+                    id: chip
 
-                    anchors.fill: parent
-                    radius: 14
-                    visible: false
-                    layer.enabled: true
-                }
+                    width: 24
+                    height: 24
+                    radius: 8
+                    color: chipHover.hovered ? colors.track : colors.surface
 
-                Image {
-                    id: artImage
-
-                    anchors.fill: parent
-                    source: MediaService.artUrl
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                    sourceSize.width: 296
-                    sourceSize.height: 296
-                    visible: status === Image.Ready
-                    layer.enabled: true
-
-                    layer.effect: MultiEffect {
-                        maskEnabled: true
-                        maskSource: artMask
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
                     }
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 14
-                    color: colors.surface
-                    visible: artImage.status !== Image.Ready
 
                     SourceIcon {
                         anchors.centerIn: parent
-                        size: 56
+                        size: 15
                         glyphColor: colors.accent
+                    }
+
+                    Rectangle {
+                        visible: MediaService.players.length > 1
+                        width: 12
+                        height: 12
+                        radius: 6
+                        color: colors.accent
+
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                            topMargin: -4
+                            rightMargin: -4
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: MediaService.players.length
+                            color: colors.onAccent
+                            font.pixelSize: 8
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    HoverHandler {
+                        id: chipHover
+
+                        cursorShape: MediaService.players.length > 1 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    }
+
+                    TapHandler {
+                        onTapped: MediaService.cycle()
                     }
                 }
 
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 14
-                    color: "transparent"
-                    border.width: 1
-                    border.color: Qt.alpha(colors.accent, 0.25)
+                MarqueeText {
+                    text: MediaService.title
+                    color: colors.text
+                    pixelSize: 15
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    anchors {
+                        left: parent.left
+                        right: chip.left
+                        rightMargin: 10
+                    }
+                }
+            }
+
+            RowLayout {
+                id: metaRow
+
+                width: parent.width
+                height: 16
+                spacing: 6
+
+                Text {
+                    text: MediaService.artist
+                    color: colors.accent
+                    font.pixelSize: 11
+                    font.weight: Font.Medium
+                    elide: Text.ElideRight
+                    Layout.maximumWidth: metaRow.width * (MediaService.album !== "" ? 0.6 : 1)
+                }
+
+                Text {
+                    visible: MediaService.album !== ""
+                    text: "·"
+                    color: colors.textMuted
+                    font.pixelSize: 11
+                }
+
+                Text {
+                    visible: MediaService.album !== ""
+                    text: MediaService.album
+                    color: colors.textMuted
+                    font.pixelSize: 11
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    visible: MediaService.album === ""
                 }
             }
 
             Item {
-                id: info
+                width: parent.width
+                height: 24
 
-                width: parent.width - art.width - parent.spacing
-                height: parent.height
+                Text {
+                    id: positionText
 
-                Item {
-                    id: header
+                    width: 34
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: root.formatTime(progress.shown * MediaService.length)
+                    color: colors.textMuted
+                    font.pixelSize: 9
+                }
 
-                    width: parent.width
-                    height: 54
+                Text {
+                    id: lengthText
 
-                    Rectangle {
-                        id: chip
+                    width: 34
+                    horizontalAlignment: Text.AlignRight
+                    text: MediaService.length > 0 ? root.formatTime(MediaService.length) : "--:--"
+                    color: colors.textMuted
+                    font.pixelSize: 9
 
-                        width: 32
-                        height: 32
-                        radius: 11
-                        color: chipHover.hovered ? colors.track : colors.surface
-
-                        anchors {
-                            top: parent.top
-                            right: parent.right
-                        }
-
-                        SourceIcon {
-                            anchors.centerIn: parent
-                            size: 20
-                            glyphColor: colors.accent
-                        }
-
-                        Rectangle {
-                            visible: MediaService.players.length > 1
-                            width: 12
-                            height: 12
-                            radius: 6
-                            color: colors.accent
-
-                            anchors {
-                                top: parent.top
-                                right: parent.right
-                                topMargin: -3
-                                rightMargin: -3
-                            }
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: MediaService.players.length
-                                color: colors.onAccent
-                                font.pixelSize: 8
-                                font.weight: Font.Bold
-                            }
-                        }
-
-                        HoverHandler {
-                            id: chipHover
-
-                            cursorShape: MediaService.players.length > 1 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        }
-
-                        TapHandler {
-                            onTapped: MediaService.cycle()
-                        }
-                    }
-
-                    Column {
-                        spacing: 2
-
-                        anchors {
-                            top: parent.top
-                            left: parent.left
-                            right: chip.left
-                            rightMargin: 12
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: MediaService.title
-                            color: colors.text
-                            font.pixelSize: 15
-                            font.weight: Font.DemiBold
-                            elide: Text.ElideRight
-                        }
-
-                        Text {
-                            width: parent.width
-                            text: MediaService.artist
-                            color: colors.accent
-                            font.pixelSize: 11
-                            font.weight: Font.Medium
-                            elide: Text.ElideRight
-                        }
-
-                        Text {
-                            width: parent.width
-                            visible: MediaService.album !== ""
-                            text: MediaService.album
-                            color: colors.textMuted
-                            font.pixelSize: 10
-                            elide: Text.ElideRight
-                        }
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
                     }
                 }
 
-                Item {
-                    id: progressRow
+                FlatSlider {
+                    id: progress
 
-                    width: parent.width
-                    height: 16
+                    pal: colors
+                    interactive: MediaService.canSeek
+                    value: MediaService.length > 0 ? Math.min(1, MediaService.position / MediaService.length) : 0
+                    onCommitted: v => MediaService.seek(v * MediaService.length)
 
                     anchors {
-                        bottom: controls.top
-                        bottomMargin: 8
+                        left: positionText.right
+                        right: lengthText.left
+                        leftMargin: 6
+                        rightMargin: 6
+                        verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: 40
+
+                Row {
+                    spacing: 2
+
+                    anchors {
+                        left: parent.left
+                        verticalCenter: parent.verticalCenter
                     }
 
-                    Text {
-                        id: positionText
+                    MediaButton {
+                        pal: colors
+                        size: 28
+                        icon: "󰒟"
+                        active: MediaService.shuffle
+                        available: MediaService.shuffleSupported
+                        onClicked: MediaService.toggleShuffle()
+                    }
 
-                        width: 34
+                    MediaButton {
+                        pal: colors
+                        size: 28
+                        icon: MediaService.loopMode === "track" ? "󰑘" : "󰑖"
+                        active: MediaService.loopMode !== "none"
+                        available: MediaService.loopSupported
+                        onClicked: MediaService.cycleLoop()
+                    }
+                }
+
+                Row {
+                    spacing: 6
+                    anchors.centerIn: parent
+
+                    MediaButton {
+                        pal: colors
+                        size: 32
+                        icon: "󰒮"
+                        available: MediaService.player ? MediaService.player.canGoPrevious : false
                         anchors.verticalCenter: parent.verticalCenter
-                        text: root.formatTime(progress.shown * MediaService.length)
-                        color: colors.textMuted
-                        font.pixelSize: 9
+                        onClicked: MediaService.previous()
+                    }
+
+                    MediaButton {
+                        pal: colors
+                        primary: true
+                        icon: MediaService.isPlaying ? "󰏤" : "󰐊"
+                        available: MediaService.player ? MediaService.player.canTogglePlaying : false
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: MediaService.toggle()
+                    }
+
+                    MediaButton {
+                        pal: colors
+                        size: 32
+                        icon: "󰒭"
+                        available: MediaService.player ? MediaService.player.canGoNext : false
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: MediaService.next()
+                    }
+                }
+
+                Row {
+                    spacing: 2
+                    opacity: MediaService.volumeSupported ? 1 : 0.35
+
+                    anchors {
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                    }
+
+                    MediaButton {
+                        pal: colors
+                        size: 26
+                        icon: root.volumeIcon(MediaService.volume)
+                        available: MediaService.volumeSupported
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: MediaService.toggleMute()
                     }
 
                     FlatSlider {
-                        id: progress
-
+                        width: 60
                         pal: colors
-                        interactive: MediaService.canSeek
-                        value: MediaService.length > 0 ? Math.min(1, MediaService.position / MediaService.length) : 0
-                        onCommitted: v => MediaService.seek(v * MediaService.length)
-
-                        anchors {
-                            left: positionText.right
-                            right: lengthText.left
-                            leftMargin: 6
-                            rightMargin: 6
-                            verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    Text {
-                        id: lengthText
-
-                        width: 34
-                        horizontalAlignment: Text.AlignRight
-                        anchors {
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                        }
-                        text: MediaService.length > 0 ? root.formatTime(MediaService.length) : "--:--"
-                        color: colors.textMuted
-                        font.pixelSize: 9
-                    }
-                }
-
-                Item {
-                    id: controls
-
-                    width: parent.width
-                    height: 40
-
-                    anchors.bottom: parent.bottom
-
-                    Row {
-                        spacing: 4
-
-                        anchors {
-                            left: parent.left
-                            verticalCenter: parent.verticalCenter
-                        }
-
-                        MediaButton {
-                            pal: colors
-                            size: 28
-                            icon: "󰒟"
-                            active: MediaService.shuffle
-                            available: MediaService.shuffleSupported
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: MediaService.toggleShuffle()
-                        }
-
-                        MediaButton {
-                            pal: colors
-                            icon: "󰒮"
-                            available: MediaService.player ? MediaService.player.canGoPrevious : false
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: MediaService.previous()
-                        }
-
-                        MediaButton {
-                            pal: colors
-                            primary: true
-                            icon: MediaService.isPlaying ? "󰏤" : "󰐊"
-                            available: MediaService.player ? MediaService.player.canTogglePlaying : false
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: MediaService.toggle()
-                        }
-
-                        MediaButton {
-                            pal: colors
-                            icon: "󰒭"
-                            available: MediaService.player ? MediaService.player.canGoNext : false
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: MediaService.next()
-                        }
-
-                        MediaButton {
-                            pal: colors
-                            size: 28
-                            icon: MediaService.loopMode === "track" ? "󰑘" : "󰑖"
-                            active: MediaService.loopMode !== "none"
-                            available: MediaService.loopSupported
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: MediaService.cycleLoop()
-                        }
-                    }
-
-                    Row {
-                        spacing: 4
-                        opacity: MediaService.volumeSupported ? 1 : 0.35
-
-                        anchors {
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                        }
-
-                        MediaButton {
-                            pal: colors
-                            size: 26
-                            icon: root.volumeIcon(MediaService.volume)
-                            available: MediaService.volumeSupported
-                            anchors.verticalCenter: parent.verticalCenter
-                            onClicked: MediaService.toggleMute()
-                        }
-
-                        FlatSlider {
-                            width: 76
-                            pal: colors
-                            thickness: 4
-                            interactive: MediaService.volumeSupported
-                            value: MediaService.volume
-                            anchors.verticalCenter: parent.verticalCenter
-                            onMoved: v => MediaService.setVolume(v)
-                        }
+                        thickness: 4
+                        interactive: MediaService.volumeSupported
+                        value: MediaService.volume
+                        anchors.verticalCenter: parent.verticalCenter
+                        onMoved: v => MediaService.setVolume(v)
                     }
                 }
             }

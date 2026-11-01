@@ -74,7 +74,7 @@ Item {
 
             anchors.fill: parent
             source: root.current
-            fillMode: Image.PreserveAspectFit
+            fillMode: root.ratioHeight > root.maxHeight ? Image.PreserveAspectFit : Image.PreserveAspectCrop
             asynchronous: true
             cache: false
             playing: root.visible && BarState.centerExpanded
@@ -84,14 +84,6 @@ Item {
                 maskEnabled: true
                 maskSource: mask
             }
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: frame.radius
-            color: "transparent"
-            border.width: 1
-            border.color: ThemeColors.border
         }
     }
 }
