@@ -63,7 +63,7 @@ Item {
         Text {
             anchors.centerIn: parent
             visible: !root.expanded
-            text: ClockService.time
+            text: ClockService.time + "  ·  " + Qt.formatDateTime(new Date(), "dd.MM.yyyy")
             color: ThemeColors.text
             font.pixelSize: 12
             font.weight: Font.DemiBold

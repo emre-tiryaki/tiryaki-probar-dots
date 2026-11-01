@@ -1,5 +1,6 @@
 
 import QtQuick
+import QtQuick.Controls
 import "../../common"
 import "../../services"
 
@@ -8,231 +9,412 @@ Item {
 
     signal backRequested()
 
-    implicitWidth: 440
-    implicitHeight: 470
+    implicitWidth: 560
+    implicitHeight: 620
 
-    Column {
+    function hourLabel(value) {
+        return value.substring(11, 16)
+    }
+
+    function dayLabel(value) {
+        const date = new Date(value + "T12:00:00")
+        return date.toLocaleDateString(Qt.locale(), "ddd, d MMM")
+    }
+
+    function clockLabel(value) {
+        return value ? value.substring(11, 16) : "--:--"
+    }
+
+    ScrollView {
         anchors.fill: parent
-        anchors.margins: 18
-        spacing: 14
+        clip: true
+        contentWidth: availableWidth
 
-        PageHeader {
+        Column {
             width: parent.width
-            title: "Weather"
-            subtitle: WeatherService.city
+            spacing: 16
+            padding: 20
 
-            onBackClicked: root.backRequested()
-        }
+            PageHeader {
+                width: parent.width
+                title: "Weather"
+                subtitle: WeatherService.city
+                    + (WeatherService.region
+                       ? ", " + WeatherService.region : "")
 
-        Rectangle {
-            width: parent.width
-            height: 150
-            radius: 20
-            color: ThemeColors.surface
-            border.width: 1
-            border.color: ThemeColors.border
+                onBackClicked: root.backRequested()
+            }
 
-            Column {
-                anchors.centerIn: parent
-                spacing: 5
+            Row {
+                width: parent.width
+                spacing: 16
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: WeatherService.loading
-                        ? "󰑐"
-                        : "󰖙"
-                    color: ThemeColors.accent
-                    font.pixelSize: 32
-                    font.family: "Symbols Nerd Font"
+                Column {
+                    width: parent.width * 0.57
+                    spacing: 8
+
+                    Text {
+                        text: WeatherService.loading
+                            ? "Updating..."
+                            : WeatherService.current.temperature_2m !== undefined
+                                ? Math.round(WeatherService.current.temperature_2m) + "°"
+                                : "--°"
+                        color: ThemeColors.text
+                        font.pixelSize: 64
+                        font.weight: Font.Light
+                    }
+
+                    Text {
+                        text: WeatherService.current.weather_code !== undefined
+                            ? WeatherService.weatherDescription(
+                                WeatherService.current.weather_code)
+                            : "Waiting for weather data"
+                        color: ThemeColors.text
+                        font.pixelSize: 16
+                    }
+
+                    Text {
+                        text: WeatherService.current.apparent_temperature !== undefined
+                            ? "Feels like " + Math.round(
+                                WeatherService.current.apparent_temperature) + "°C"
+                            : ""
+                        color: ThemeColors.textMuted
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        text: WeatherService.daily.length
+                            ? "H: " + Math.round(WeatherService.daily[0].high)
+                                + "°   L: " + Math.round(WeatherService.daily[0].low) + "°"
+                            : ""
+                        color: ThemeColors.textMuted
+                        font.pixelSize: 12
+                    }
                 }
 
+                Item {
+                    width: parent.width * 0.35
+                    height: 130
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: WeatherService.weatherIcon(
+                            WeatherService.current.weather_code ?? -1,
+                            WeatherService.current.is_day ?? 1)
+                        color: ThemeColors.accent
+                        font.family: "Symbols Nerd Font"
+                        font.pixelSize: 76
+                    }
+                }
+            }
+
+            Text {
+                visible: WeatherService.error.length > 0
+                width: parent.width
+                text: WeatherService.error
+                color: ThemeColors.error
+                wrapMode: Text.Wrap
+            }
+
+            Row {
+                width: parent.width
+                spacing: 10
+
+                Repeater {
+                    model: [
+                        {
+                            title: "Humidity",
+                            value: WeatherService.current.relative_humidity_2m,
+                            unit: "%",
+                            icon: "󰖌"
+                        },
+                        {
+                            title: "Wind",
+                            value: WeatherService.current.wind_speed_10m,
+                            unit: " km/h",
+                            icon: "󰖝"
+                        },
+                        {
+                            title: "UV index",
+                            value: WeatherService.daily.length
+                                ? WeatherService.daily[0].uv : "--",
+                            unit: "",
+                            icon: "󰖙"
+                        }
+                    ]
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: (parent.width - 20) / 3
+                        height: 100
+                        radius: 16
+                        color: ThemeColors.surface
+                        border.width: 1
+                        border.color: ThemeColors.border
+
+                        Column {
+                            anchors.centerIn: parent
+                            spacing: 7
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.icon
+                                color: ThemeColors.accent
+                                font.family: "Symbols Nerd Font"
+                                font.pixelSize: 20
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.value === undefined
+                                    ? "--" : modelData.value + modelData.unit
+                                color: ThemeColors.text
+                                font.pixelSize: 13
+                                font.weight: Font.DemiBold
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.title
+                                color: ThemeColors.textMuted
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+                }
+            }
+
+            Grid {
+                width: parent.width
+                columns: 2
+                spacing: 10
+
+                Repeater {
+                    model: [
+                        {
+                            title: "Rain chance",
+                            value: WeatherService.hourly.length
+                                ? WeatherService.hourly[0].rainChance + "%" : "--"
+                        },
+                        {
+                            title: "Precipitation",
+                            value: WeatherService.current.precipitation !== undefined
+                                ? WeatherService.current.precipitation + " mm" : "--"
+                        },
+                        {
+                            title: "Pressure",
+                            value: WeatherService.current.pressure_msl !== undefined
+                                ? WeatherService.current.pressure_msl + " hPa" : "--"
+                        },
+                        {
+                            title: "Cloud cover",
+                            value: WeatherService.current.cloud_cover !== undefined
+                                ? WeatherService.current.cloud_cover + "%" : "--"
+                        },
+                        {
+                            title: "Wind gusts",
+                            value: WeatherService.current.wind_gusts_10m !== undefined
+                                ? WeatherService.current.wind_gusts_10m + " km/h" : "--"
+                        },
+                        {
+                            title: "Sunrise / sunset",
+                            value: WeatherService.daily.length
+                                ? root.clockLabel(WeatherService.daily[0].sunrise)
+                                    + " / "
+                                    + root.clockLabel(WeatherService.daily[0].sunset)
+                                : "--"
+                        }
+                    ]
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: (parent.width - 10) / 2
+                        height: 66
+                        radius: 12
+                        color: ThemeColors.surface
+
+                        Column {
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 14
+                            spacing: 5
+
+                            Text {
+                                text: modelData.title
+                                color: ThemeColors.textMuted
+                                font.pixelSize: 11
+                            }
+
+                            Text {
+                                text: modelData.value
+                                color: ThemeColors.text
+                                font.pixelSize: 14
+                                font.weight: Font.DemiBold
+                            }
+                        }
+                    }
+                }
+            }
+
+            Row {
+                width: parent.width
+
                 Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: WeatherService.loading
-                        ? "Loading weather..."
-                        : WeatherService.error.length
-                            ? WeatherService.error
-                            : Math.round(WeatherService.temperature) + "°C"
+                    text: "Next 24 hours"
                     color: ThemeColors.text
-                    font.pixelSize: 30
+                    font.pixelSize: 16
                     font.weight: Font.DemiBold
                 }
 
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: WeatherService.condition
-                    color: ThemeColors.textMuted
-                    font.pixelSize: 12
-                }
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Feels like " + Math.round(WeatherService.feelsLike) + "°C"
-                    color: ThemeColors.textMuted
-                    font.pixelSize: 10
-                }
+                Item { width: 1; height: 1 }
             }
-        }
 
-        Row {
-            width: parent.width
-            spacing: 10
-
-            Repeater {
-                model: [
-                    {
-                        title: "Humidity",
-                        value: WeatherService.humidity + "%",
-                        icon: "󰖌"
-                    },
-                    {
-                        title: "Wind",
-                        value: WeatherService.windSpeed + " km/h",
-                        icon: "󰖝"
-                    }
-                ]
+            ListView {
+                width: parent.width
+                height: 125
+                orientation: ListView.Horizontal
+                spacing: 8
+                clip: true
+                model: WeatherService.hourly
 
                 delegate: Rectangle {
                     required property var modelData
-
-                    width: (parent.width - 10) / 2
-                    height: 82
-                    radius: 15
+                    width: 84
+                    height: 116
+                    radius: 14
                     color: ThemeColors.surface
-                    border.width: 1
-                    border.color: ThemeColors.border
 
                     Column {
                         anchors.centerIn: parent
-                        spacing: 5
+                        spacing: 7
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.icon
-                            color: ThemeColors.accent
-                            font.family: "Symbols Nerd Font"
-                            font.pixelSize: 20
+                            text: root.hourLabel(modelData.time)
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 10
                         }
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.value
+                            text: WeatherService.weatherIcon(modelData.code, 1)
+                            color: ThemeColors.accent
+                            font.family: "Symbols Nerd Font"
+                            font.pixelSize: 23
+                        }
+
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: Math.round(modelData.temperature) + "°"
                             color: ThemeColors.text
-                            font.pixelSize: 13
+                            font.pixelSize: 16
                             font.weight: Font.DemiBold
                         }
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.title
+                            text: modelData.rainChance + "% rain"
                             color: ThemeColors.textMuted
-                            font.pixelSize: 10
+                            font.pixelSize: 9
                         }
                     }
                 }
             }
-        }
-
-        Row {
-            width: parent.width
 
             Text {
-                text: "Hourly forecast"
+                text: "7-day forecast"
                 color: ThemeColors.text
-                font.pixelSize: 13
+                font.pixelSize: 16
                 font.weight: Font.DemiBold
             }
 
-            Item { width: 1; height: 1 }
-        }
+            Repeater {
+                model: WeatherService.daily
 
-        ListView {
-            width: parent.width
-            height: 100
-            orientation: ListView.Horizontal
-            spacing: 8
-            clip: true
-            model: WeatherService.hourly
+                delegate: Rectangle {
+                    required property var modelData
+                    width: parent.width
+                    height: 66
+                    radius: 13
+                    color: ThemeColors.surface
 
-            delegate: Rectangle {
-                required property var modelData
+                    Row {
+                        anchors.fill: parent
+                        anchors.margins: 12
+                        spacing: 12
 
-                width: 82
-                height: 92
-                radius: 13
-                color: ThemeColors.surface
-                border.width: 1
-                border.color: ThemeColors.border
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 7
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: {
-                            const raw = Number(modelData.time)
-                            return raw === 0
-                                ? "00:00"
-                                : String(Math.floor(raw / 100)).padStart(2, "0") + ":00"
+                        Text {
+                            width: 90
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: root.dayLabel(modelData.date)
+                            color: ThemeColors.text
+                            font.pixelSize: 11
                         }
-                        color: ThemeColors.textMuted
-                        font.pixelSize: 10
-                    }
 
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "󰖙"
-                        color: ThemeColors.accent
-                        font.family: "Symbols Nerd Font"
-                        font.pixelSize: 20
-                    }
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: WeatherService.weatherIcon(modelData.code, 1)
+                            color: ThemeColors.accent
+                            font.family: "Symbols Nerd Font"
+                            font.pixelSize: 22
+                        }
 
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: modelData.temperature + "°"
-                        color: ThemeColors.text
-                        font.pixelSize: 14
-                        font.weight: Font.DemiBold
+                        Text {
+                            width: 90
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: WeatherService.weatherDescription(modelData.code)
+                            color: ThemeColors.textMuted
+                            font.pixelSize: 10
+                            elide: Text.ElideRight
+                        }
+
+                        Item {
+                            width: 1
+                            height: 1
+                        }
+
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: Math.round(modelData.low) + "° / "
+                                + Math.round(modelData.high) + "°"
+                            color: ThemeColors.text
+                            font.pixelSize: 12
+                            font.weight: Font.DemiBold
+                        }
                     }
                 }
             }
-        }
 
-        Item {
-            width: parent.width
-            height: 28
-
-            Text {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: WeatherService.error.length
-                    ? WeatherService.error
-                    : "Updated: " + WeatherService.updatedAt
-                color: ThemeColors.textMuted
-                font.pixelSize: 9
-                elide: Text.ElideRight
-                width: parent.width - 42
-            }
-
-            Rectangle {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                width: 30
-                height: 28
-                radius: 9
-                color: ThemeColors.surface
+            Row {
+                width: parent.width
+                spacing: 12
 
                 Text {
-                    anchors.centerIn: parent
-                    text: "󰑐"
-                    color: ThemeColors.text
-                    font.family: "Symbols Nerd Font"
-                    font.pixelSize: 16
+                    width: parent.width - 50
+                    text: WeatherService.latitude.toFixed(3) + ", "
+                        + WeatherService.longitude.toFixed(3)
+                    color: ThemeColors.textMuted
+                    font.pixelSize: 10
+                    anchors.verticalCenter: parent.verticalCenter
                 }
 
-                TapHandler {
-                    onTapped: WeatherService.refresh()
+                Rectangle {
+                    width: 38
+                    height: 34
+                    radius: 10
+                    color: ThemeColors.surface
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰑐"
+                        color: ThemeColors.text
+                        font.family: "Symbols Nerd Font"
+                        font.pixelSize: 18
+                    }
+
+                    TapHandler {
+                        onTapped: WeatherService.refreshLocation()
+                    }
                 }
             }
         }
