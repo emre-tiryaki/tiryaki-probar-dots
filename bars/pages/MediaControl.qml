@@ -75,7 +75,9 @@ Item {
                 NumberAnimation {
                     duration: 300
                 }
+
             }
+
         }
 
         Item {
@@ -115,6 +117,7 @@ Item {
                     maskEnabled: true
                     maskSource: artMask
                 }
+
             }
 
             Rectangle {
@@ -128,6 +131,7 @@ Item {
                     size: 52
                     glyphColor: colors.accent
                 }
+
             }
 
             Rectangle {
@@ -137,6 +141,7 @@ Item {
                 border.width: 1
                 border.color: Qt.alpha(colors.accent, 0.25)
             }
+
         }
 
         Column {
@@ -196,6 +201,7 @@ Item {
                             font.pixelSize: 8
                             font.weight: Font.Bold
                         }
+
                     }
 
                     HoverHandler {
@@ -207,6 +213,7 @@ Item {
                     TapHandler {
                         onTapped: MediaService.cycle()
                     }
+
                 }
 
                 MarqueeText {
@@ -220,7 +227,9 @@ Item {
                         right: chip.left
                         rightMargin: 10
                     }
+
                 }
+
             }
 
             RowLayout {
@@ -259,6 +268,7 @@ Item {
                     Layout.fillWidth: true
                     visible: MediaService.album === ""
                 }
+
             }
 
             Item {
@@ -288,6 +298,7 @@ Item {
                         right: parent.right
                         verticalCenter: parent.verticalCenter
                     }
+
                 }
 
                 FlatSlider {
@@ -296,7 +307,9 @@ Item {
                     pal: colors
                     interactive: MediaService.canSeek
                     value: MediaService.length > 0 ? Math.min(1, MediaService.position / MediaService.length) : 0
-                    onCommitted: v => MediaService.seek(v * MediaService.length)
+                    onCommitted: (v) => {
+                        return MediaService.seek(v * MediaService.length);
+                    }
 
                     anchors {
                         left: positionText.right
@@ -305,7 +318,9 @@ Item {
                         rightMargin: 6
                         verticalCenter: parent.verticalCenter
                     }
+
                 }
+
             }
 
             Item {
@@ -324,6 +339,7 @@ Item {
                         pal: colors
                         size: 28
                         icon: "󰒟"
+                        visible: MediaService.shuffleSupported
                         active: MediaService.shuffle
                         available: MediaService.shuffleSupported
                         onClicked: MediaService.toggleShuffle()
@@ -333,10 +349,12 @@ Item {
                         pal: colors
                         size: 28
                         icon: MediaService.loopMode === "track" ? "󰑘" : "󰑖"
+                        visible: MediaService.loopSupported
                         active: MediaService.loopMode !== "none"
                         available: MediaService.loopSupported
                         onClicked: MediaService.cycleLoop()
                     }
+
                 }
 
                 Row {
@@ -369,11 +387,12 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: MediaService.next()
                     }
+
                 }
 
                 Row {
                     spacing: 2
-                    opacity: MediaService.volumeSupported ? 1 : 0.35
+                    visible: MediaService.volumeSupported
 
                     anchors {
                         right: parent.right
@@ -399,7 +418,9 @@ Item {
                         onMoved: v => MediaService.setVolume(v)
                     }
                 }
+
             }
+
         }
 
         Rectangle {
@@ -409,5 +430,7 @@ Item {
             border.width: 1
             border.color: Qt.alpha(colors.accent, 0.2)
         }
+
     }
+
 }

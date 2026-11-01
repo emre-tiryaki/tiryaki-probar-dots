@@ -14,13 +14,6 @@ Column {
     width: parent ? parent.width : 0
     spacing: 10
 
-    // implicitHeight read-only hatasını önlemek için Binding kullanıyoruz
-    Binding {
-        target: root
-        property: "implicitHeight"
-        value: root.childrenRect.height
-    }
-
     Grid {
         width: parent.width
 
