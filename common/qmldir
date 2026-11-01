@@ -4,3 +4,6 @@ CenterModuleCard 1.0 CenterModuleCard.qml
 SystemStatGauge 1.0 SystemStatGauge.qml
 PageHeader 1.0 PageHeader.qml
 MonitorPreview 1.0 MonitorPreview.qml
+FlatSlider 1.0 FlatSlider.qml
+MediaButton 1.0 MediaButton.qml
+SourceIcon 1.0 SourceIcon.qml

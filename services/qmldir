@@ -12,3 +12,4 @@ singleton NotificationService 1.0 NotificationService.qml
 singleton ClipboardService 1.0 ClipboardService.qml
 singleton LauncherService 1.0 LauncherService.qml
 singleton WeatherService 1.0 WeatherService.qml
+singleton MediaService 1.0 MediaService.qml

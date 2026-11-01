@@ -76,6 +76,13 @@ Item {
 
         }
 
+        MediaControl {
+            width: parent.width
+        }
+
+        MediaIdle {
+            width: parent.width
+        }
     }
 
 }
