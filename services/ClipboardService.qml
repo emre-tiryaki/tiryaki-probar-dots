@@ -39,6 +39,12 @@ Singleton {
         refreshTimer.restart()
     }
 
+    function clear() {
+        Quickshell.execDetached(["cliphist", "wipe"])
+        root.entries = []
+        refreshTimer.restart()
+    }
+
     Process {
         id: listProcess
 

@@ -32,7 +32,7 @@ Item {
             spacing: 8
 
             Rectangle {
-                width: parent.width - 44
+                width: parent.width - 88
                 height: 38
                 radius: 12
                 color: ThemeColors.surface
@@ -77,6 +77,33 @@ Item {
 
                 TapHandler {
                     onTapped: ClipboardService.refresh()
+                }
+            }
+
+            Rectangle {
+                width: 36
+                height: 38
+                radius: 12
+                color: clearHover.hovered ? ThemeColors.error : ThemeColors.surface
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰩹"
+                    color: clearHover.hovered ? ThemeColors.background : ThemeColors.text
+                    font.pixelSize: 17
+                }
+
+                HoverHandler {
+                    id: clearHover
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                TapHandler {
+                    onTapped: ClipboardService.clear()
+                }
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
                 }
             }
         }
