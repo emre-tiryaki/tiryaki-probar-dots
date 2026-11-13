@@ -7,6 +7,7 @@ Column {
     id: root
 
     signal backRequested()
+    signal openPage(string id)
 
     function outputIcon(node) {
         const name = (node.description || node.name || "").toLowerCase();
@@ -80,6 +81,23 @@ Column {
             spacing: 8
 
             SectionTitle {
+                muted: true
+                text: "Microphone"
+            }
+
+            VolumeCard {
+                width: parent.width
+                icon: SoundService.microphoneMuted ? "󰍭" : "󰍬"
+                title: "Input"
+                subtitle: SoundService.source ? (SoundService.source.description || SoundService.source.name || "") : ""
+                value: SoundService.microphoneVolume
+                muted: SoundService.microphoneMuted
+                onMoved: v => SoundService.setMicrophoneVolume(v)
+                onClicked: root.openPage("input")
+            }
+
+            SectionTitle {
+                topPadding: 8
                 muted: true
                 text: "Output Devices"
             }

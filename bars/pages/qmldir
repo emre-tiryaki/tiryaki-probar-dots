@@ -1,5 +1,6 @@
 ArtPalette 1.0 ArtPalette.qml
 AudioPage 1.0 AudioPage.qml
+BrightnessPage 1.0 BrightnessPage.qml
 BluetoothPage 1.0 BluetoothPage.qml
 CalendarPage 1.0 CalendarPage.qml
 CenterHome 1.0 CenterHome.qml

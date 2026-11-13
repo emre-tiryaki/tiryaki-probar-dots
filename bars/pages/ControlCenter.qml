@@ -12,6 +12,8 @@ Column {
     spacing: 10
 
     Grid {
+        id: tileGrid
+
         width: parent.width
         columns: 2
         columnSpacing: 8
@@ -47,6 +49,21 @@ Column {
         }
     }
 
+    // Full-width pills (span both grid columns). Add new wide tiles here.
+    Column {
+        width: tileGrid.implicitWidth
+        spacing: 8
+
+        ControlTile {
+            width: parent.width
+            icon: VpnService.connected ? "󰦝" : "󰦞"
+            title: "VPN"
+            subtitle: VpnService.connecting ? "Connecting..." : VpnService.connected ? "Cloudflare WARP" : VpnService.available ? "Disconnected" : "WARP unavailable"
+            active: VpnService.connected
+            onClicked: VpnService.toggle()
+        }
+    }
+
     VolumeCard {
         width: parent.width
         icon: SoundService.muted ? "󰖁" : "󰕾"
@@ -60,12 +77,11 @@ Column {
 
     VolumeCard {
         width: parent.width
-        icon: SoundService.microphoneMuted ? "󰍭" : "󰍬"
-        title: "Input"
-        value: SoundService.microphoneVolume
-        muted: SoundService.microphoneMuted
-        onMoved: v => SoundService.setMicrophoneVolume(v)
-        onClicked: root.openPage("input")
+        icon: BrightnessService.icon
+        title: "Brightness"
+        value: BrightnessService.brightness
+        onMoved: v => BrightnessService.setBrightness(v)
+        onClicked: root.openPage("brightness")
     }
 
     Separator {}

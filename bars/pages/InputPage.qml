@@ -6,7 +6,7 @@ import "../../services"
 Column {
     id: root
 
-    signal backRequested()
+    signal openPage(string id)
 
     spacing: 14
 
@@ -14,7 +14,7 @@ Column {
         width: parent.width
         centered: false
         title: "Input"
-        onBackClicked: root.backRequested()
+        onBackClicked: root.openPage("audio")
     }
 
     SectionTitle {

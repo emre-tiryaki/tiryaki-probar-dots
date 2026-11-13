@@ -26,7 +26,8 @@ Singleton {
         { id: "wifi",      file: "WifiPage.qml" },
         { id: "bluetooth", file: "BluetoothPage.qml" },
         { id: "audio",     file: "AudioPage.qml" },
-        { id: "input",     file: "InputPage.qml" }
+        { id: "input",      file: "InputPage.qml" },
+        { id: "brightness", file: "BrightnessPage.qml" }
     ]
 
     readonly property var stats: [
