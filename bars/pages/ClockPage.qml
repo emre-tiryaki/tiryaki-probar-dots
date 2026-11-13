@@ -10,14 +10,6 @@ Item {
     implicitWidth: 380
     implicitHeight: content.height + 24
 
-    Rectangle {
-        anchors.fill: parent
-
-        radius: 18
-        color: ThemeColors.background
-
-        clip: true
-    }
 
     Column {
         id: content

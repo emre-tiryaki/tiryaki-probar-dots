@@ -37,6 +37,20 @@ Singleton {
         available &&
         battery.state === UPowerDeviceState.Discharging
 
+    readonly property string icon: {
+        if (!available)
+            return "󰂑"
+        if (charging)
+            return "󰂄"
+        if (percentage >= 80)
+            return "󰁹"
+        if (percentage >= 50)
+            return "󰂀"
+        if (percentage >= 30)
+            return "󰁾"
+        return "󰁺"
+    }
+
     readonly property string statusText: {
         if (!available)
             return "Unavailable"

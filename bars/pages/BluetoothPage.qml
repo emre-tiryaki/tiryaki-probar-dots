@@ -6,11 +6,10 @@ import "../../services"
 Item {
     id: root
 
-    property var goBack
+    signal backRequested()
     property string connectingDevice: ""
     property bool scanning: false
-
-    width: parent ? parent.width : 0
+    readonly property string connectedText: BluetoothService.connectedCount + (BluetoothService.connectedCount === 1 ? " device connected" : " devices connected")
 
     // Keep the page within the expanded panel.
     property real maxPageHeight: 430
@@ -147,258 +146,31 @@ Item {
         width: parent.width
         spacing: 16
 
-        // Header
-        Row {
+        PageHeader {
             width: parent.width
-            height: 40
-
-            spacing: 12
-
-            Rectangle {
-                width: 40
-                height: 40
-                radius: 12
-
-                color: backMouse.containsMouse
-                    ? ThemeColors.surfaceHover
-                    : ThemeColors.surface
-
-                scale: backMouse.pressed
-                    ? 0.94
-                    : backMouse.containsMouse
-                        ? 1.03
-                        : 1.0
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 120
-                    }
-                }
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 100
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                Text {
-                    anchors.centerIn: parent
-
-                    text: "󰁍"
-
-                    color: ThemeColors.text
-
-                    font.family: "Symbols Nerd Font"
-                    font.pixelSize: 20
-                }
-
-                MouseArea {
-                    id: backMouse
-
-                    anchors.fill: parent
-                    hoverEnabled: true
-
-                    onClicked: {
-                        if (root.goBack)
-                            root.goBack()
-                    }
-                }
-            }
-
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-
-                spacing: 2
-
-                Text {
-                    text: "Bluetooth"
-
-                    color: ThemeColors.text
-
-                    font.pixelSize: 16
-                    font.weight: Font.DemiBold
-                }
-
-                Text {
-                    text: BluetoothService.enabled
-                        ? BluetoothService.connectedCount > 0
-                            ? BluetoothService.connectedCount +
-                              (
-                                  BluetoothService.connectedCount === 1
-                                      ? " device connected"
-                                      : " devices connected"
-                              )
-                            : "Enabled"
-                        : "Disabled"
-
-                    color: ThemeColors.textMuted
-
-                    font.pixelSize: 10
-                }
-            }
+            centered: false
+            title: "Bluetooth"
+            subtitle: BluetoothService.enabled ? (BluetoothService.connectedCount > 0 ? root.connectedText : "Enabled") : "Disabled"
+            onBackClicked: root.backRequested()
         }
 
-        // Bluetooth toggle
-        Rectangle {
+        ToggleCard {
             width: parent.width
-            height: 60
-
-            radius: 16
-
-            color: bluetoothMouse.containsMouse
-                ? ThemeColors.surfaceHover
-                : ThemeColors.surface
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 150
-                }
-            }
-
-            Text {
-                anchors {
-                    left: parent.left
-                    leftMargin: 14
-                    verticalCenter: parent.verticalCenter
-                }
-
-                text: "󰂯"
-
-                color: BluetoothService.enabled
-                    ? ThemeColors.text
-                    : ThemeColors.textMuted
-
-                font.family: "Symbols Nerd Font"
-                font.pixelSize: 22
-            }
-
-            Column {
-                anchors {
-                    left: parent.left
-                    leftMargin: 50
-                    right: bluetoothSwitch.left
-                    rightMargin: 12
-                    verticalCenter: parent.verticalCenter
-                }
-
-                spacing: 2
-
-                Text {
-                    text: "Bluetooth"
-
-                    color: ThemeColors.text
-
-                    font.pixelSize: 12
-                    font.weight: Font.DemiBold
-                }
-
-                Text {
-                    width: parent.width
-
-                    text: BluetoothService.enabled
-                        ? BluetoothService.connectedCount > 0
-                            ? BluetoothService.connectedCount +
-                              (
-                                  BluetoothService.connectedCount === 1
-                                      ? " device connected"
-                                      : " devices connected"
-                              )
-                            : "Ready to connect"
-                        : "Disabled"
-
-                    color: ThemeColors.textMuted
-
-                    font.pixelSize: 10
-
-                    elide: Text.ElideRight
-                }
-            }
-
-            Rectangle {
-                id: bluetoothSwitch
-
-                anchors {
-                    right: parent.right
-                    rightMargin: 14
-                    verticalCenter: parent.verticalCenter
-                }
-
-                width: 42
-                height: 24
-                radius: 12
-
-                color: BluetoothService.enabled
-                    ? ThemeColors.accent
-                    : ThemeColors.background
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 180
-                    }
-                }
-
-                Rectangle {
-                    width: 18
-                    height: 18
-                    radius: 9
-
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    x: BluetoothService.enabled
-                        ? parent.width - width - 3
-                        : 3
-
-                    color: ThemeColors.text
-
-                    Behavior on x {
-                        NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: {
-                        BluetoothService.toggle()
-                    }
-                }
-            }
-
-            MouseArea {
-                id: bluetoothMouse
-
-                anchors.fill: parent
-                hoverEnabled: true
-
-                onClicked: {
-                    BluetoothService.toggle()
-                }
-
-                z: -1
-            }
+            icon: "󰂯"
+            title: "Bluetooth"
+            subtitle: BluetoothService.enabled ? (BluetoothService.connectedCount > 0 ? root.connectedText : "Ready to connect") : "Disabled"
+            checked: BluetoothService.enabled
+            onToggled: BluetoothService.toggle()
         }
 
         // Devices header
-        Row {
+        Item {
             width: parent.width
             height: 30
 
-            Text {
-                anchors {
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-
+            SectionTitle {
+                anchors.verticalCenter: parent.verticalCenter
                 text: "Devices"
-
-                color: ThemeColors.text
-
-                font.pixelSize: 13
-                font.weight: Font.DemiBold
             }
 
             Rectangle {

@@ -3,7 +3,10 @@ import QtQuick
 Item {
     id: slider
 
-    property var pal
+    property var pal: null // optional palette { track, accent, text }; defaults to theme
+    property color trackColor: pal ? pal.track : ThemeColors.border
+    property color fillColor: pal ? pal.accent : ThemeColors.accent
+    property color knobColor: pal ? pal.text : ThemeColors.text
     property real value: 0
     property bool interactive: true
     property real thickness: 5
@@ -22,14 +25,14 @@ Item {
         width: parent.width
         height: slider.thickness
         radius: height / 2
-        color: slider.pal.track
+        color: slider.trackColor
         anchors.verticalCenter: parent.verticalCenter
 
         Rectangle {
             width: parent.width * slider.shown
             height: parent.height
             radius: parent.radius
-            color: slider.pal.accent
+            color: slider.fillColor
 
             Behavior on width {
                 enabled: !slider.dragging
@@ -45,7 +48,7 @@ Item {
         width: slider.thickness + 7
         height: width
         radius: width / 2
-        color: slider.pal.text
+        color: slider.knobColor
         x: groove.width * slider.shown - width / 2
         anchors.verticalCenter: parent.verticalCenter
         opacity: slider.interactive && (area.containsMouse || slider.dragging) ? 1 : 0

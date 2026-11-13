@@ -1,10 +1,16 @@
 import "../../common"
+import "../../state"
 import QtQuick
+import "."
 
+// Home grid; cards come from PageRegistry.center entries that have a title.
 Item {
     id: root
 
-    signal openPage(string page)
+    readonly property var cards: PageRegistry.center.filter(p => p.title)
+    readonly property int perRow: 4
+
+    signal openPage(string id)
 
     implicitWidth: rows.implicitWidth + 32
     implicitHeight: rows.implicitHeight + 32
@@ -15,65 +21,28 @@ Item {
         anchors.centerIn: parent
         spacing: 10
 
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 10
+        Repeater {
+            model: Math.ceil(root.cards.length / root.perRow)
 
-            CenterModuleCard {
-                title: "Power"
-                description: "Shutdown & restart"
-                icon: "󰐥"
-                onClicked: root.openPage("power")
+            Row {
+                required property int index
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 10
+
+                Repeater {
+                    model: root.cards.slice(index * root.perRow, (index + 1) * root.perRow)
+
+                    CenterModuleCard {
+                        required property var modelData
+
+                        title: modelData.title
+                        description: modelData.description || ""
+                        icon: modelData.icon || ""
+                        onClicked: root.openPage(modelData.id)
+                    }
+                }
             }
-
-            CenterModuleCard {
-                title: "System Stats"
-                description: "CPU, GPU & memory"
-                icon: "󰍛"
-                onClicked: root.openPage("stats")
-            }
-
-            CenterModuleCard {
-                title: "Power Mode"
-                description: "Performance profiles"
-                icon: "󰂄"
-                onClicked: root.openPage("power-mode")
-            }
-
-            CenterModuleCard {
-                title: "Weather"
-                description: "Weather forecast"
-                icon: "󰖙"
-                onClicked: root.openPage("weather")
-            }
-
-        }
-
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 10
-
-            CenterModuleCard {
-                title: "Clock"
-                description: "Clock & stopwatch"
-                icon: "󰥔"
-                onClicked: root.openPage("clock")
-            }
-
-            CenterModuleCard {
-                title: "Calendar"
-                description: "View your calendar"
-                icon: "󰃭"
-                onClicked: root.openPage("calendar")
-            }
-
-            CenterModuleCard {
-                title: "Clipboard"
-                description: "Clipboard history"
-                icon: "󰅍"
-                onClicked: root.openPage("clipboard")
-            }
-
         }
 
         MediaControl {
@@ -84,5 +53,4 @@ Item {
             width: parent.width
         }
     }
-
 }

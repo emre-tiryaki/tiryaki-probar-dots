@@ -1,1 +1,2 @@
 singleton BarState 1.0 BarState.qml
+singleton PageRegistry 1.0 PageRegistry.qml

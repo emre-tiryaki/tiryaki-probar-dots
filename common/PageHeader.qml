@@ -1,138 +1,61 @@
 import QtQuick
 
+// Back button + title/subtitle. centered: false gives the left-aligned panel style.
 Item {
     id: root
 
     property string title: ""
     property string subtitle: ""
-
     property bool showBack: true
+    property bool centered: true
 
     signal backClicked()
 
     implicitWidth: 540
     implicitHeight: 48
 
-    Rectangle {
+    Card {
         id: backButton
 
         visible: root.showBack
-
         width: 40
         height: 40
-
-        anchors {
-            left: parent.left
-            verticalCenter: parent.verticalCenter
-        }
-
         radius: 13
+        hoverScale: 1.04
+        anchors.verticalCenter: parent.verticalCenter
+        onClicked: root.backClicked()
 
-        color:
-            backHover.hovered
-                ? ThemeColors.surfaceHover
-                : ThemeColors.surface
-
-        border.width: 1
-
-        border.color:
-            backHover.hovered
-                ? ThemeColors.accent
-                : ThemeColors.border
-
-        scale:
-            backHover.hovered
-                ? 1.04
-                : 1.0
-
-        Behavior on color {
-            ColorAnimation {
-                duration: 120
-            }
-        }
-
-        Behavior on border.color {
-            ColorAnimation {
-                duration: 120
-            }
-        }
-
-        Behavior on scale {
-            NumberAnimation {
-                duration: 120
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        Text {
+        Icon {
             anchors.centerIn: parent
-
             text: "󰁍"
-
-            color:
-                backHover.hovered
-                    ? ThemeColors.accent
-                    : ThemeColors.text
-
-            font.family: "Symbols Nerd Font"
+            color: backButton.hovered ? ThemeColors.accent : ThemeColors.text
             font.pixelSize: 18
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 120
-                }
-            }
-        }
-
-        HoverHandler {
-            id: backHover
-
-            cursorShape: Qt.PointingHandCursor
-        }
-
-        TapHandler {
-            onTapped:
-                root.backClicked()
         }
     }
 
     Column {
-        anchors {
-            verticalCenter: parent.verticalCenter
-            horizontalCenter: parent.horizontalCenter
-        }
-
-        spacing:
-            root.subtitle !== ""
-                ? 2
-                : 0
+        anchors.verticalCenter: parent.verticalCenter
+        x: root.centered ? (parent.width - width) / 2 : (root.showBack ? backButton.width + 12 : 0)
+        width: root.centered ? implicitWidth : parent.width - x
+        spacing: 2
 
         Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-
+            anchors.horizontalCenter: root.centered ? parent.horizontalCenter : undefined
+            width: root.centered ? implicitWidth : parent.width
             text: root.title
-
             color: ThemeColors.text
-
-            font.pixelSize: 15
+            font.pixelSize: root.centered ? 15 : 16
             font.weight: Font.DemiBold
-
-            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
         }
 
         Text {
             visible: root.subtitle !== ""
-
-            anchors.horizontalCenter: parent.horizontalCenter
-
+            anchors.horizontalCenter: root.centered ? parent.horizontalCenter : undefined
+            width: root.centered ? implicitWidth : parent.width
             text: root.subtitle
-
             color: ThemeColors.textMuted
-
-            font.pixelSize: 8
-
-            horizontalAlignment: Text.AlignHCenter
-
+            font.pixelSize: root.centered ? 8 : 10
             elide: Text.ElideRight
         }
     }

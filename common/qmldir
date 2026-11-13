@@ -1,10 +1,20 @@
 singleton ThemeColors 1.0 ThemeColors.qml
-ControlTile 1.0 ControlTile.qml
+AudioNodeCard 1.0 AudioNodeCard.qml
+Card 1.0 Card.qml
 CenterModuleCard 1.0 CenterModuleCard.qml
-SystemStatGauge 1.0 SystemStatGauge.qml
-PageHeader 1.0 PageHeader.qml
-MonitorPreview 1.0 MonitorPreview.qml
+ControlTile 1.0 ControlTile.qml
 FlatSlider 1.0 FlatSlider.qml
-MediaButton 1.0 MediaButton.qml
-SourceIcon 1.0 SourceIcon.qml
+Icon 1.0 Icon.qml
 MarqueeText 1.0 MarqueeText.qml
+MediaButton 1.0 MediaButton.qml
+PageHeader 1.0 PageHeader.qml
+PageStack 1.0 PageStack.qml
+ProgressBar 1.0 ProgressBar.qml
+SectionTitle 1.0 SectionTitle.qml
+Separator 1.0 Separator.qml
+SourceIcon 1.0 SourceIcon.qml
+StatusItem 1.0 StatusItem.qml
+SystemStatGauge 1.0 SystemStatGauge.qml
+ToggleCard 1.0 ToggleCard.qml
+ToggleSwitch 1.0 ToggleSwitch.qml
+VolumeCard 1.0 VolumeCard.qml

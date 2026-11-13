@@ -1,84 +1,12 @@
+import "../../common"
+import "../../state"
 import QtQuick
 
-import "../../common"
-import "../../services"
-
-Item {
-    id: root
-
+// Nested navigation: overview -> cpu / gpu. Back on the overview leaves the page.
+PageStack {
     signal backRequested()
 
-    property string page: "overview"
-
-    implicitWidth:
-        pageLoader.item
-            ? pageLoader.item.implicitWidth
-            : 540
-
-    implicitHeight:
-        pageLoader.item
-            ? pageLoader.item.implicitHeight
-            : 470
-
-    Loader {
-        id: pageLoader
-
-        sourceComponent: {
-            switch (root.page) {
-            case "cpu":
-                return cpuPage
-
-            case "gpu":
-                return gpuPage
-
-            default:
-                return overviewPage
-            }
-        }
-    }
-
-    function openCpu() {
-        page = "cpu"
-    }
-
-    function openGpu() {
-        page = "gpu"
-    }
-
-    function goBack() {
-        page = "overview"
-    }
-
-    Component {
-        id: overviewPage
-
-        StatsOverview {
-            onBackRequested:
-                root.backRequested()
-
-            onCpuClicked:
-                root.openCpu()
-
-            onGpuClicked:
-                root.openGpu()
-        }
-    }
-
-    Component {
-        id: cpuPage
-
-        CpuStatsPage {
-            onBackRequested:
-                root.goBack()
-        }
-    }
-
-    Component {
-        id: gpuPage
-
-        GpuStatsPage {
-            onBackRequested:
-                root.goBack()
-        }
-    }
+    baseUrl: Qt.resolvedUrl("./")
+    pages: PageRegistry.stats
+    onExitRequested: backRequested()
 }

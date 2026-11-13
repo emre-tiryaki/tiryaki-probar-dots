@@ -1,6 +1,6 @@
 import QtQuick
 
-Rectangle {
+Card {
     id: tile
 
     property string icon
@@ -8,17 +8,12 @@ Rectangle {
     property string subtitle
     property bool active: false
 
-    signal clicked()
-
+    width: 180
+    height: 64
     radius: 14
-    color: active ? Qt.alpha(ThemeColors.accent, 0.14) : area.containsMouse ? ThemeColors.surfaceHover : ThemeColors.surface
-    border.width: 1
-    border.color: active ? ThemeColors.accent : area.containsMouse ? ThemeColors.textMuted : ThemeColors.border
-    scale: area.pressed ? 0.97 : 1
-
-    Behavior on color { ColorAnimation { duration: 120 } }
-    Behavior on border.color { ColorAnimation { duration: 120 } }
-    Behavior on scale { NumberAnimation { duration: 80 } }
+    hoverScale: 1
+    color: active ? Qt.alpha(ThemeColors.accent, 0.14) : hovered ? ThemeColors.surfaceHover : ThemeColors.surface
+    border.color: active ? ThemeColors.accent : hovered ? ThemeColors.textMuted : ThemeColors.border
 
     Row {
         spacing: 10
@@ -31,10 +26,9 @@ Rectangle {
             rightMargin: 12
         }
 
-        Text {
+        Icon {
             text: tile.icon
             color: tile.active ? ThemeColors.accent : ThemeColors.text
-            font.family: "Symbols Nerd Font"
             font.pixelSize: 22
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -61,14 +55,5 @@ Rectangle {
                 elide: Text.ElideRight
             }
         }
-    }
-
-    MouseArea {
-        id: area
-
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: tile.clicked()
     }
 }

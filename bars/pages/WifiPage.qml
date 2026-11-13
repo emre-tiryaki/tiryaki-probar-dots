@@ -6,13 +6,11 @@ import "../../services"
 Column {
     id: root
 
-    property var goBack
+    signal backRequested()
 
     property var selectedNetwork: null
     property string password: ""
     property string errorMessage: ""
-
-    width: parent ? parent.width : 0
 
     spacing: 16
 
@@ -58,72 +56,18 @@ Column {
         password = ""
     }
 
-    // Header
-    Row {
+    PageHeader {
         width: parent.width
-        spacing: 12
-
-        Rectangle {
-            width: 40
-            height: 40
-
-            radius: 12
-
-            color: ThemeColors.surface
-
-            Text {
-                anchors.centerIn: parent
-
-                text: "󰁍"
-
-                color: ThemeColors.text
-
-                font.family: "Symbols Nerd Font"
-                font.pixelSize: 20
-            }
-
-            TapHandler {
-                onTapped: {
-                    if (root.selectedNetwork) {
-                        root.selectedNetwork = null
-                        root.password = ""
-                        root.errorMessage = ""
-                    } else if (root.goBack) {
-                        root.goBack()
-                    }
-                }
-            }
-        }
-
-        Column {
-            spacing: 2
-
-            anchors.verticalCenter: parent.verticalCenter
-
-            Text {
-                text: root.selectedNetwork
-                    ? root.selectedNetwork.name
-                    : "Wi-Fi"
-
-                color: ThemeColors.text
-
-                font.pixelSize: 16
-                font.weight: Font.DemiBold
-            }
-
-            Text {
-                text: root.selectedNetwork
-                    ? "Enter password"
-                    : NetworkService.connecting
-                        ? "Connecting to " +
-                          NetworkService.connectingNetwork
-                        : NetworkService.connected
-                            ? NetworkService.currentNetwork
-                            : "Disconnected"
-
-                color: ThemeColors.textMuted
-
-                font.pixelSize: 10
+        centered: false
+        title: root.selectedNetwork ? root.selectedNetwork.name : "Wi-Fi"
+        subtitle: root.selectedNetwork ? "Enter password" : NetworkService.connecting ? "Connecting to " + NetworkService.connectingNetwork : NetworkService.connected ? NetworkService.currentNetwork : "Disconnected"
+        onBackClicked: {
+            if (root.selectedNetwork) {
+                root.selectedNetwork = null;
+                root.password = "";
+                root.errorMessage = "";
+            } else {
+                root.backRequested();
             }
         }
     }
@@ -206,7 +150,7 @@ Column {
 
             text: root.errorMessage
 
-            color: "#f38ba8"
+            color: ThemeColors.error
 
             font.pixelSize: 10
         }
@@ -246,146 +190,17 @@ Column {
 
         spacing: 12
 
-        // Wi-Fi toggle
-        Rectangle {
+        ToggleCard {
             width: parent.width
-            height: 60
-
-            radius: 16
-
-            color: ThemeColors.surface
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 180
-                }
-            }
-
-            // Wi-Fi icon
-            Text {
-                id: wifiToggleIcon
-
-                anchors {
-                    left: parent.left
-                    leftMargin: 14
-                    verticalCenter: parent.verticalCenter
-                }
-
-                text: NetworkService.enabled
-                    ? "󰤨"
-                    : "󰤭"
-
-                color: ThemeColors.text
-
-                font.family: "Symbols Nerd Font"
-                font.pixelSize: 22
-            }
-
-            // Wi-Fi information
-            Column {
-                anchors {
-                    left: wifiToggleIcon.right
-                    leftMargin: 12
-                    right: wifiToggleSwitch.left
-                    rightMargin: 12
-                    verticalCenter: parent.verticalCenter
-                }
-
-                spacing: 2
-
-                Text {
-                    width: parent.width
-
-                    text: "Wi-Fi"
-
-                    color: ThemeColors.text
-
-                    font.pixelSize: 12
-                    font.weight: Font.DemiBold
-                }
-
-                Text {
-                    width: parent.width
-
-                    text: NetworkService.connecting
-                        ? "Connecting to " +
-                        NetworkService.connectingNetwork
-                        : NetworkService.enabled
-                            ? NetworkService.connected
-                                ? NetworkService.currentNetwork
-                                : "Enabled"
-                            : "Disabled"
-
-                    color: ThemeColors.textMuted
-
-                    font.pixelSize: 10
-
-                    elide: Text.ElideRight
-                }
-            }
-
-            // Wi-Fi switch
-            Rectangle {
-                id: wifiToggleSwitch
-
-                anchors {
-                    right: parent.right
-                    rightMargin: 14
-                    verticalCenter: parent.verticalCenter
-                }
-
-                width: 42
-                height: 24
-
-                radius: 12
-
-                color: NetworkService.enabled
-                    ? ThemeColors.accent
-                    : ThemeColors.background
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 180
-                    }
-                }
-
-                Rectangle {
-                    width: 18
-                    height: 18
-
-                    radius: 9
-
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    x: NetworkService.enabled
-                        ? parent.width - width - 3
-                        : 3
-
-                    color: ThemeColors.text
-
-                    Behavior on x {
-                        NumberAnimation {
-                            duration: 180
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-                }
-
-                TapHandler {
-                    onTapped: {
-                        NetworkService.toggle()
-                    }
-                }
-            }
+            icon: NetworkService.enabled ? "󰤨" : "󰤭"
+            title: "Wi-Fi"
+            subtitle: NetworkService.connecting ? "Connecting to " + NetworkService.connectingNetwork : NetworkService.enabled ? (NetworkService.connected ? NetworkService.currentNetwork : "Enabled") : "Disabled"
+            checked: NetworkService.enabled
+            onToggled: NetworkService.toggle()
         }
 
-        Text {
+        SectionTitle {
             text: "Networks"
-
-            color: ThemeColors.text
-
-            font.pixelSize: 13
-            font.weight: Font.DemiBold
         }
 
         Column {
