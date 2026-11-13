@@ -6,7 +6,7 @@ import QtQuick
 PageStack {
     signal backRequested()
 
-    baseUrl: Qt.resolvedUrl("./")
+    dir: "bars/pages/"
     pages: PageRegistry.stats
     onExitRequested: backRequested()
 }

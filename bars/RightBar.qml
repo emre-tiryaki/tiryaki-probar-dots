@@ -115,7 +115,7 @@ Item {
             PageStack {
                 id: pages
 
-                baseUrl: Qt.resolvedUrl("pages/")
+                dir: "bars/pages/"
                 pages: PageRegistry.right
 
                 anchors {

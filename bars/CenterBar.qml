@@ -68,7 +68,7 @@ Item {
             id: pages
 
             visible: root.expanded
-            baseUrl: Qt.resolvedUrl("pages/")
+            dir: "bars/pages/"
             pages: PageRegistry.center
         }
 
