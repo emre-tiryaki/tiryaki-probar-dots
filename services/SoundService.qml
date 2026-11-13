@@ -23,6 +23,37 @@ Singleton {
         source !== null &&
         source.ready
 
+    // Volume boost: allows raising volumes up to 200%.
+    property alias boostEnabled: persist.boostEnabled
+
+    readonly property real maxVolume:
+        boostEnabled ? 2 : 1
+
+    PersistentProperties {
+        id: persist
+
+        reloadableId: "soundServiceBoost"
+
+        property bool boostEnabled: false
+    }
+
+    function setBoostEnabled(enabled) {
+        persist.boostEnabled = enabled
+        if (enabled)
+            return
+
+        // Pull anything above 100% back down when the boost is turned off.
+        const nodes = [root.sink, ...root.outputDevices, ...root.applicationStreams]
+        for (const node of nodes) {
+            if (node && node.ready && node.audio && node.audio.volume > 1)
+                node.audio.volume = 1
+        }
+    }
+
+    function toggleBoost() {
+        setBoostEnabled(!boostEnabled)
+    }
+
     readonly property real volume:
         ready ? sink.audio.volume : 0
 
@@ -83,10 +114,10 @@ Singleton {
         }
     }
 
-    function clamp(value) {
+    function clamp(value, max) {
         return Math.max(
             0,
-            Math.min(1, value)
+            Math.min(max === undefined ? 1 : max, value)
         )
     }
 
@@ -95,7 +126,7 @@ Singleton {
             return
 
         sink.audio.volume =
-            clamp(value)
+            clamp(value, maxVolume)
     }
 
     function changeVolume(delta) {
@@ -141,7 +172,7 @@ Singleton {
             return
 
         node.audio.volume =
-            clamp(value)
+            clamp(value, node.isSink ? maxVolume : 1)
     }
 
     function toggleNodeMute(node) {

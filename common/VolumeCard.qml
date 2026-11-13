@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 
 // Icon + title + percentage + draggable volume bar.
-// value is 0..1; moved(v) fires while dragging, clicked() on tap outside the bar.
+// value is 0..maxValue; moved(v) fires while dragging, clicked() on tap outside the bar.
 Rectangle {
     id: card
 
@@ -12,6 +12,7 @@ Rectangle {
     property string subtitle: ""
     property color subtitleColor: ThemeColors.textMuted
     property real value: 0
+    property real maxValue: 1        // slider range upper bound (e.g. 2 for 200%)
     property bool muted: false
     property bool highlighted: false
 
@@ -113,9 +114,9 @@ Rectangle {
         FlatSlider {
             width: parent.width
             height: 10
-            value: card.value
-            fillColor: card.muted ? ThemeColors.textMuted : ThemeColors.accent
-            onMoved: v => card.moved(v)
+            value: card.value / card.maxValue
+            fillColor: card.muted ? ThemeColors.textMuted : card.value > 1 ? ThemeColors.warning : ThemeColors.accent
+            onMoved: v => card.moved(v * card.maxValue)
         }
     }
 }

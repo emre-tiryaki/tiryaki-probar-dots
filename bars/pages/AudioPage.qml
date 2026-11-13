@@ -19,11 +19,50 @@ Column {
 
     spacing: 14
 
-    PageHeader {
+    Item {
         width: parent.width
-        centered: false
-        title: "Audio"
-        onBackClicked: root.backRequested()
+        height: header.implicitHeight
+
+        PageHeader {
+            id: header
+
+            anchors.fill: parent
+            anchors.rightMargin: boostButton.width + 12
+            centered: false
+            title: "Audio"
+            onBackClicked: root.backRequested()
+        }
+
+        Card {
+            id: boostButton
+
+            readonly property bool active: SoundService.boostEnabled
+
+            width: boostRow.implicitWidth + 24
+            height: 36
+            radius: 12
+            hoverScale: 1.04
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            color: active ? ThemeColors.warning : hovered ? ThemeColors.surfaceHover : ThemeColors.surface
+            border.color: active ? ThemeColors.warning : hovered ? ThemeColors.accent : ThemeColors.border
+            onClicked: SoundService.toggleBoost()
+
+            Row {
+                id: boostRow
+
+                anchors.centerIn: parent
+                spacing: 6
+
+                Icon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "󰝝"
+                    color: boostButton.active ? ThemeColors.background : ThemeColors.text
+                    font.pixelSize: 15
+                }
+                
+            }
+        }
     }
 
     Flickable {

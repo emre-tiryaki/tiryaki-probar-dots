@@ -52,6 +52,7 @@ Column {
         icon: SoundService.muted ? "󰖁" : "󰕾"
         title: "Audio"
         value: SoundService.volume
+        maxValue: SoundService.maxVolume
         muted: SoundService.muted
         onMoved: v => SoundService.setVolume(v)
         onClicked: root.openPage("audio")
