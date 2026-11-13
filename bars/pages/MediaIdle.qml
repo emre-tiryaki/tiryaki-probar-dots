@@ -15,7 +15,8 @@ Item {
     property real naturalWidth: 0
     property real naturalHeight: 0
     readonly property bool imageReady: naturalWidth > 0 && naturalHeight > 0
-    property real cardHeight: fallbackHeight
+    // Declarative so it never reads a stale imageReady inside a change handler.
+    readonly property real cardHeight: imageReady && width > 0 ? width * naturalHeight / naturalWidth : fallbackHeight
 
     function pick() {
         if (!hasFiles) {
@@ -31,25 +32,11 @@ Item {
         current = pool[Math.floor(Math.random() * pool.length)];
     }
 
-    function updateHeight() {
-        cardHeight = imageReady && width > 0 ? width * naturalHeight / naturalWidth : fallbackHeight;
-
-        const mode = cardHeight > maxHeight ? Image.PreserveAspectFit : Image.PreserveAspectCrop;
-        if (anim.fillMode !== mode)
-            anim.fillMode = mode;
-    }
-
     visible: !MediaService.hasPlayer && hasFiles
     implicitHeight: visible ? Math.min(maxHeight, cardHeight) : 0
     height: implicitHeight
     onHasFilesChanged: pick()
-    onWidthChanged: updateHeight()
-    onNaturalWidthChanged: updateHeight()
-    onNaturalHeightChanged: updateHeight()
-    Component.onCompleted: {
-        updateHeight();
-        pick();
-    }
+    Component.onCompleted: pick()
 
     FolderListModel {
         id: files
@@ -90,7 +77,7 @@ Item {
 
             anchors.fill: parent
             source: root.current
-            fillMode: Image.PreserveAspectCrop
+            fillMode: root.cardHeight > root.maxHeight ? Image.PreserveAspectFit : Image.PreserveAspectCrop
             asynchronous: true
             cache: false
             playing: root.visible && BarState.centerExpanded
@@ -101,8 +88,10 @@ Item {
                 maskSource: mask
             }
 
-            onStatusChanged: {
-                if (status !== Image.Ready || implicitWidth <= 0)
+            // A freshly created page (e.g. returning via back) can reach Ready
+            // before the implicit size is known, so track size changes too.
+            function syncNaturalSize() {
+                if (status !== Image.Ready || implicitWidth <= 0 || implicitHeight <= 0)
                     return ;
 
                 if (root.naturalWidth !== implicitWidth)
@@ -111,6 +100,11 @@ Item {
                 if (root.naturalHeight !== implicitHeight)
                     root.naturalHeight = implicitHeight;
             }
+
+            onStatusChanged: syncNaturalSize()
+            onImplicitWidthChanged: syncNaturalSize()
+            onImplicitHeightChanged: syncNaturalSize()
         }
     }
+
 }
